@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block content %}
+<section>
+    <section style="padding-top: 3em;padding-bottom: 3em;padding-right: 1.5em;padding-left: 1.5em;">
+        <div class="container">
+            <nav class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                      <h4 class= "title is-4">Browse Projects</h4>
+
+                    </div>
+                  </div>
+
+                  <div class="level-right">
+                    <div class="level-item">
+                      
+                    </div>
+                  </div>
+            </nav>
+            <div class="box" style="margin-bottom: 2em;">
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Code</th> 
+                  <th class="has-text-centered">Name</th> 
+                  <th class="has-text-centered">Host</th>
+                  <th class="has-text-centered">Country</th> 
+                  <th class="has-text-centered">Date</th>
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                      <div class="tag is-light"><a href="{{ url_for('project_page',project_id='AGA000') }}" >AGA000</a></span> </div>
+                  </td> 
+                  <td class="has-text-centered"> My First TB Project</td> 
+                  <td class="has-text-centered">Human</span></td> 
+                  <td class="has-text-centered"><span class="emoji">🇿🇦</span> </td>
+                  <td class="has-text-centered">Never</td> 
+                  </tr>
+
+                  <tr>
+                      <td class="has-text-centered">
+                          <div class="tag is-light"><a href="{{ url_for('project_page',project_id='AGA001') }}" >AGA001</a></span> </div>
+                      </td> 
+                      <td class="has-text-centered"> My Second TB Project</td> 
+                      <td class="has-text-centered">Human</span></td> 
+                      <td class="has-text-centered"><span class="emoji">🇿🇦</span> </td>
+                      <td class="has-text-centered">Never</td> 
+                      </tr>
+
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+    
+</section>
+{% endblock %}

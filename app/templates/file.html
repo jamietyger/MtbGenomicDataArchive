@@ -1,0 +1,215 @@
+{% extends "layout.html" %}
+{% block content %}
+<section>
+    <section style="padding-top: 3em;padding-bottom: 3em;padding-right: 1.5em;padding-left: 1.5em;">
+        <div class="container">
+            <nav class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                      <h4 class= "title is-4">{{fileid}}</h4>
+
+                    </div>
+                  </div>
+
+                  <div class="level-right">
+                    <div class="level-item">
+                      
+                    </div>
+                  </div>
+            </nav>
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Organism info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Genome ID</th> 
+                  <th class="has-text-centered">Genome Name</th> 
+                  <th class="has-text-centered">Genome Status</th>
+                  <th class="has-text-centered">Strain</th> 
+                  <th class="has-text-centered">NCBI taxon ID</th>
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="tag is-light">1295720.3</span> </div>
+                  </td> 
+                  <td class="has-text-centered">Mycobacterium tuberculosis TKK_02_0004</td> 
+                  <td class="has-text-centered">
+                        <div class="tag is-light">WGS</span> </div>
+                        </td> 
+                  <td class="has-text-centered">TKK_02_0004</td>
+                  <td class="has-text-centered">1295720 </td>
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Isolate info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Isolation Source</th> 
+                  <th class="has-text-centered">Isolation Comments</th>
+                  <th class="has-text-centered">Isolation Country</th> 
+                  <th class="has-text-centered">Geographic Location</th>
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="has-text-centered">sputum</span> </div>
+                  </td> 
+                  <td class="has-text-centered"></td> 
+                  <td class="has-text-centered">
+                        <div class="tag is-light">South Africa                        </span> </div>
+                        </td> 
+                  <td class="has-text-centered">South Africa: King George V Hospital, Durban                  </td>
+            
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+          
+        <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Host info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Host name</th> 
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="has-text-centered ">Human, Homo sapiens
+                  </span> </div>
+                  </td> 
+            
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Sequence info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Contigs</th> 
+                  <th class="has-text-centered">Genome Length</th>
+                  <th class="has-text-centered">GC Content</th> 
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="has-text-centered">6</span> </div>
+                  </td> 
+                  <td class="has-text-centered">4405060                  </td> 
+                  <td class="has-text-centered">
+                        <div class="has-text-centered">65.6                        </span> </div>
+                        </td> 
+            
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+        <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Project info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Sequencing Centre</th> 
+                  <th class="has-text-centered">Completion Date</th>
+                  <th class="has-text-centered">Collection Date</th> 
+                  <th class="has-text-centered">Sequencing Platform</th>
+                  <th class="has-text-centered">Assembly Method</th>
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="tag is-light">Broad Institute                  </span> </div>
+                  </td> 
+                  <td class="has-text-centered">2014-04-29</td> 
+                  <td class="has-text-centered">
+                        <div class="has-text-centered">2010                        </span> </div>
+                        </td> 
+                  <td class="has-text-centered">Illumina</td>
+                  <td class="has-text-centered">allpaths v. R47129  </td>
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+
+        <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Other info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Date inserted</th> 
+                  <th class="has-text-centered">Date Modified</th>
+                  <th class="has-text-centered">Comments</th> 
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">2014-12-08</span>
+                  </td> 
+                  <td class="has-text-centered">2015-03-16</td> 
+                  <td class="has-text-centered">TB-ARC - KRITH                  </td> 
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+
+
+
+
+
+        </div>
+    
+</section>
+{% endblock %}
