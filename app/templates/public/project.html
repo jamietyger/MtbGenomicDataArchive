@@ -1,0 +1,203 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}{{ projectid }}{% endblock %}
+{% block heading %}{{ projectid }}{% endblock %}
+
+{% block main %}
+<div class="container">
+        <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Organism info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Genome ID</th> 
+                  <th class="has-text-centered">Genome Name</th> 
+                  <th class="has-text-centered">Genome Status</th>
+                  <th class="has-text-centered">Strain</th> 
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="tag is-light">{{ item["genome_id"] }}</span> </div>
+                  </td> 
+                  <td class="has-text-centered">{{ item["genome_name"] }}</td> 
+                  <td class="has-text-centered">
+                        <div class="tag is-light">{{ item["genome_status"] }}</span> </div>
+                        </td> 
+                  <td class="has-text-centered">{{ item["genome_strain"] }}</td>
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Isolate info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Sample Source</th>
+                  <th class="has-text-centered">Sample Collection Date</th> 
+                  <th class="has-text-centered">Sample Country</th> 
+                  <th class="has-text-centered">Sample Geographic Location</th>
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="has-text-centered">{{ item["sample_source"] }}</span> </div>
+                  </td> 
+                  <td class="has-text-centered">{{ item["sample_collection_date"] }}    
+                  
+                  <td class="has-text-centered">
+                        <div class="tag is-light">{{ item["sample_country"] }}                        </span> </div>
+                        </td> 
+                  <td class="has-text-centered">{{ item["sample_geographic_location"] }}                  </td>
+                                </td>
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+          
+        <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Host info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Host name</th> 
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="has-text-centered ">{{ item["host_name"] }}  
+                  </span> </div>
+                  </td> 
+            
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Sequence info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Contigs</th> 
+                  <th class="has-text-centered">Genome Length</th>
+                  <th class="has-text-centered">GC Content</th> 
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="has-text-centered">{{ item["contigs"] }}  </span> </div>
+                  </td> 
+                  <td class="has-text-centered">{{ item["genome_length"] }}                   </td> 
+                  <td class="has-text-centered">
+                        <div class="has-text-centered">{{ item["gc_content"] }}                          </span> </div>
+                        </td> 
+            
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+        <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Project info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Sequencing Centre</th> 
+                  <th class="has-text-centered">Sequencing Country</th> 
+                  <th class="has-text-centered">Sequencing Platform</th>
+                  <th class="has-text-centered">Sequencing Completion Date</th>
+                  <th class="has-text-centered">Phenotypic Method</th>
+                  
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">
+                  <div class="tag is-light">{{ item["sequencing_centre"] }}                 </span> </div>
+                  </td> 
+                  <td class="has-text-centered">{{ item["sequencing_country"] }} </td>
+                  <td class="has-text-centered">{{ item["sequencing_platform"] }} </td> 
+                  <td class="has-text-centered">
+                        <div class="has-text-centered">{{ item["sequencing_completion_date"] }}                         </span> </div>
+                        </td> 
+                  <td class="has-text-centered">{{ item["phenotypic_method"] }}</td>
+                  
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+
+        <div class="container">
+            <div class="box" style="margin-bottom: 2em;">
+                <h6 class= "title is-6">Other info</h6> 
+              <table class="table is-hoverable is-fullwidth">
+                <thead>
+                  <tr>
+                  <th class="has-text-centered">Date Uploaded</th> 
+                </tr>
+              </thead> 
+              
+              <tfoot>
+              </tfoot> 
+              <tbody>
+                  <tr>
+                  <td class="has-text-centered">{{ item["date_uploaded"] }}</span>
+                  </td>  
+                  </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+
+
+
+
+
+        
+</div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

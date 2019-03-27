@@ -1,0 +1,51 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Projects{% endblock %}
+{% block heading %}Browse Projects{% endblock %}
+
+{% block main %}
+<div class="container">
+<div class="box" style="margin-bottom: 2em;">
+
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+        <th class="has-text-centered">Code</th> 
+        <th class="has-text-centered">Name</th> 
+        <th class="has-text-centered">Host</th>
+        <th class="has-text-centered">Country</th> 
+        <th class="has-text-centered">Date</th>
+      </tr>
+    </thead> 
+    
+    <tfoot>
+    </tfoot> 
+    <tbody>
+
+
+        
+            {% for project in projects.items() %}
+            <tr>
+                <td class="has-text-centered">
+                    <div class="tag is-light"><a href="/projects/{{ project[0] }}" >{{ project[0] }}</a></span> </div>
+                </td> 
+                <td class="has-text-centered"> {{ project[1]["name"] }}</td> 
+                <td class="has-text-centered">{{ project[1]["host"] }}</span></td> 
+                <td class="has-text-centered"><span class="emoji">{{ project[1]["country"] }}</span> </td>
+                <td class="has-text-centered">{{ project[1]["date"] }}</td> 
+                </tr>
+            
+            {% endfor %}
+        
+
+
+
+    </tbody>
+  </table>
+</div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

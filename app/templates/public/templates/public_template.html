@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+
+ 
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <nav class="navbar is-transparent has-shadow has-spacing">
+    <div class="container">
+    <div class="navbar-brand">
+      <div class="navbar-item" >
+    <!-----<img src="/static/images/afrideal.png" alt="AfriDeal" width="112" height="28">--->
+    <b>AGA</b>
+      </div>
+  
+      <div class ="navbar-burger burger" data-target="navMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <div id="navMenu" class="navbar-menu">
+      <div class="navbar-start">
+        <a href="/" class="navbar-item">Dashboard</a>
+        <a href="/projects" class="navbar-item">Projects</a>
+        <a href="/repository" class="navbar-item">Repository</a>
+
+  <div class="navbar-item">
+  <input size="40" name="q" maxlength="500" value="" id="search" class="input" placeholder="Search" required="required" autocomplete="off" type="search">
+  </div>
+  </div>
+    <div class="navbar-end">
+  
+     <p class="navbar-item">
+      <a href="#" class="navbar-item">Docs</a>
+      <a href="#" class="navbar-item">User</a>
+    </p>
+  
+    </div>
+  
+    </div>
+    </nav>
+        
+            <section>
+                <section style="padding-top: 3em;padding-bottom: 3em;padding-right: 1.5em;padding-left: 1.5em;">
+                    <div class="container">
+                        <nav class="level">
+                            <div class="level-left">
+                                <div class="level-item">
+                                  <h4 class= "title is-4">{% block heading %}{% endblock %}</h4>
+            
+                                </div>
+                              </div>
+                            
+
+                              <div class="level-right">
+                                <div class="level-item">
+                                  <a href="/upload-project" class="button is-link  ">
+                                    <span><strong>Upload</strong></span>
+                                  </a>
+                                </div>
+
+                                
+                              </div>
+                        </nav>
+                       
+                    </div>
+                
+           
+              
+            
+            </section>
+            </section>
+
+
+
+
+
+
+
+
+
+
+
+
+                {% block main %}{% endblock %}
+              
+
+  
+      <!-- Import our custom JavaScript -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  
+
+
+
+
+  {% block script %}{% endblock %}
+
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p>
+        <strong>AGA - African Genome Archive</strong> 
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
+
+<style>
+    .fix-footer {
+        position: absolute;
+        width: 100%;
+        bottom: 0;
+        overflow:hidden;
+    }
+    </style>

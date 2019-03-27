@@ -1,0 +1,63 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Repository{% endblock %}
+{% block heading %}Browse Repository{% endblock %}
+
+{% block main %}
+<div class="container">
+<div class="box" style="margin-bottom: 2em;">
+
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+        <th class="has-text-centered">File ID</th> 
+        <th class="has-text-centered">Repository</th> 
+        <th class="has-text-centered">Project</th>
+        <th class="has-text-centered">Genome Status</th> 
+        <th class="has-text-centered">Format</th>
+        <th class="has-text-centered">Size</th>
+        <th class="has-text-centered">Download</th>
+      </tr>
+    </thead> 
+    
+    <tfoot>
+    </tfoot> 
+    <tbody>
+
+
+        
+            {% for file in files.items() %}
+            <tr>
+                <td class="has-text-centered">
+                    <div class="tag is-light"><a href="/files/{{ file[0] }}" >{{ file[0] }}</a></span> </div>
+                </td> 
+                <td class="has-text-centered"> {{ file[1]["repository"] }}</td> 
+                <td class="has-text-centered">
+                    <div class="tag is-light"><a href="/projects/{{ file[1]["project_id"] }}" >{{ file[1]["project_id"] }}</a></span></div> 
+                </td> 
+                <td class="has-text-centered">{{ file[1]["genome_status"] }}</td>
+                <td class="has-text-centered">{{ file[1]["format"] }}</td> 
+                <td class="has-text-centered">{{ file[1]["size"] }}</td> 
+                <td class="has-text-centered">
+                <a href= {{ file[1]["path"] }} class="button">
+                    <span class="icon is-small">
+                      <i class="fas fa-download"></i>
+                    </span>
+                  </a>
+                </td>
+                </tr>
+            
+            {% endfor %}
+        
+
+
+
+    </tbody>
+  </table>
+</div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}
