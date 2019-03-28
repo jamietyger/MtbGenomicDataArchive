@@ -4,8 +4,15 @@ from flask import request, redirect
 from flask import jsonify, make_response
 from werkzeug.utils import secure_filename
 from flask import send_file, send_from_directory, safe_join, abort
+import xlrd
+from collections import OrderedDict
+import simplejson as json
+import pprint
 
 import os
+import zipfile
+
+
 
 
 app.config["PROJECT_UPLOADS"] = "app/static/project/uploads"
@@ -149,36 +156,50 @@ def repository():
 
     return render_template("public/repository.html",files=files)
 
-@app.route("/files/<fileid>")
-def files(fileid):
-    files = {
-    "FI0001": {
-        "genome_id": "1295720.3",
-        "genome_name": "Mycobacterium tuberculosis TKK_02_0004",
-        "genome_status": "WGS",
-        "strain": "TKK_02_0004",
-        "sample_source": "sputum",
-        "sample_country": "ZA",
-        "sample_geographic_location": "Tygerberg Hospital, Western Cape",
-        "sample_collection_date": "2014-04-29",
-        "sequencing_country": "USA",
-        "sequencing_centre": "Broad Institute",
-        "sequencing_platform": "Illumina",
-        "sequencing_completion_date": "2014-12-08",
-        "phenotypic_method": "MGIT960",
-        "host_name": "Human",
-        "contigs": "6",
-        "genome_length": "4405060",
-        "gc_content": "65.6",
-        "date_uploaded": "2014-12-08"
-    }
 
-}
+def convert_csv(filepath):
+    wb = xlrd.open_workbook(filepath)
+    sh = wb.sheet_by_index(0) 
+    # List to hold dictionaries
+    samples_list = []
+    header_values = []
+    # Iterate through each row in worksheet and fetch values into dict
+    for rownum in range(0, sh.nrows):
+        
+        if rownum == 0:
+            header_values = sh.row_values(rownum)
+            
+        else:
+            sample = OrderedDict()
+            row_values = sh.row_values(rownum)
+            
+            for i in range (len(header_values)):
+                sample[header_values[i]] = row_values[i]
+            samples_list.append(sample)
+    # Serialize the list of dicts to JSON
+    j = json.dumps(samples_list)
+
+    return samples_list
+
+
+
+
+
+
+@app.route("/files/<sampleid>")
+def files(sampleid):
+
+    files1 = convert_csv(app.config["PROJECT_UPLOADS"]+"/"+"Tuberculosis-SANBI"+"/metadata.xlsx")
+    
+    print(files1[0])
+    print(files1[0]['sample_id'])
 
     item = None
-    if fileid in files:
-        item = files[fileid]
-        return render_template("/public/file.html", fileid=fileid,item=item)
+    if sampleid == files1[0]['sample_id']:
+        print("I AM HERE")
+        item = files1[0]
+        print (item)
+        return render_template("/public/file.html", fileid=sampleid,item=item)
     else:
         return redirect("/")
 
@@ -275,6 +296,17 @@ def upload_project():
                     project.save(os.path.join(app.config["PROJECT_UPLOADS"], filename))
 
                     print("Project saved")
+                    print(app.config["PROJECT_UPLOADS"]+"/"+filename)
+
+                    
+
+                    with zipfile.ZipFile(app.config["PROJECT_UPLOADS"]+"/"+filename,"r") as zip_ref:
+                        zip_ref.extractall(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"-"+req['projectname']+"/")
+                    
+                    
+
+                    print("Project Unzipped")
+
                     req = request.form
                     print(req)
                     return redirect("/")
