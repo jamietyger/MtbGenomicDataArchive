@@ -20,6 +20,11 @@ ansible-playbook -i inv site.yml
 
 ```
 
+Requirements
+
+```
+pip install -r requirements.txt
+```
 
 
 
