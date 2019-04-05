@@ -12,14 +12,25 @@ import pprint
 import os
 import zipfile
 
-
+from irods.session import iRODSSession
 
 
 app.config["PROJECT_UPLOADS"] = "app/static/project/uploads"
 app.config["ALLOWED_PROJECT_EXTENSIONS"] = ["ZIP"]
 app.config["MAX_PROJECT_FILESIZE"] = 0.5 * 1024 * 1024
-app.config["CLIENT_IMAGES"] = "/home/ubuntu/app/app/static/client/img"
-app.config["CLIENT_REPORTS"] = "/home/ubuntu/app/app/static/client/reports"
+
+
+
+def irods_put(username,passw,filen,path):
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+        env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        session.collections.create(path)
+        session.data_objects.put(filen,path)
+        print("irods put")
+
 
 @app.route("/")
 def index():
@@ -298,17 +309,25 @@ def upload_project():
                     print("Project saved")
                     print(app.config["PROJECT_UPLOADS"]+"/"+filename)
 
+                    req = request.form
+                    
                     
 
                     with zipfile.ZipFile(app.config["PROJECT_UPLOADS"]+"/"+filename,"r") as zip_ref:
-                        zip_ref.extractall(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"-"+req['projectname']+"/")
+                        zip_ref.extractall(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/")
                     
                     
 
                     print("Project Unzipped")
 
-                    req = request.form
-                    print(req)
+                    for root, dirs, files in os.walk(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"):  
+                        for filename in files:
+                            irods_put("alice","alicepass",app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+filename,"/tempZone/home/alice/"+req['projectname']+"/")
+
+                    
+
+                    
+                   
                     return redirect("/")
 
                 else:
