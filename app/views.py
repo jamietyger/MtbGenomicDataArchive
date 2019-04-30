@@ -35,9 +35,14 @@ def irods_getCollection(path):
             print (coll.metadata.items())
             print("irods Collection Metadata View")
 
+def irodsmetaJSON(metadata):
+    metadict = dict()
+    for meta in metadata:
+        metadict[meta.name]=meta.value
+    return metadict
 
 
-def irods_createCollection(path):
+def irods_createCollection(path,metadata):
     username = "alice"
     passw="alicepass"
     try:
@@ -49,7 +54,9 @@ def irods_createCollection(path):
             coll = session.collections.create(path)
             print ("Col ID: "+str(coll.id))
             print ("Col Path: "+coll.path)
-            coll.metadata.add("My KEY", "999")
+            for key in metadata:
+                coll.metadata.add(key,metadata[key]) 
+            
             print (coll.metadata.items())
             print("irods Collection Created Complete")
 
@@ -102,31 +109,25 @@ def sign_up():
 
 @app.route("/projects")
 def projects():
-    projects = {
-    "AGA000": {
-        "name": "My First TB Project",
-        "host": "Pathogen",
-        "country": "ZA",
-        "date":"27/03/2019"
-        
-    },
-    "AGA001": {
-        "name": "My Second TB Project",
-        "host": "Human",
-        "country": "ZA",
-        "date":"27/03/2019"
-    },
-    "AGA002": {
-       "name": "My Third TB Project",
-        "host": "Human",
-        "country": "ZA",
-        "date":"27/03/2019"
-    }
-}
-
-
-
-
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+            
+            coll = session.collections.get("/tempZone/home/alice")
+         
+            projects = dict()
+            for col in coll.subcollections:
+                print(col.path)
+                col2=session.collections.get(col.path)
+                colmeta=col2.metadata.items()
+                print(colmeta)
+                metadata= irodsmetaJSON(colmeta)
+                projects[col.id]=metadata
+    print(projects)
     return render_template("public/projects.html", projects=projects)
 
 @app.route("/projects/<projectid>")
@@ -353,7 +354,7 @@ def upload_project():
                     
 
                     print("Project Unzipped")
-                    irods_createCollection("/tempZone/home/alice/"+req['projectname']+"/")
+                    irods_createCollection("/tempZone/home/alice/"+req['projectname'],req)
                     print("Collection Created")
 
                     for root, dirs,files in os.walk(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"):  
@@ -363,7 +364,7 @@ def upload_project():
 
                     
 
-                    irods_getCollection("/tempZone/home/alice/"+req['projectname']+"/")
+                    irods_getCollection("/tempZone/home/alice/"+req['projectname'])
                    
                     return redirect("/")
 

@@ -10,11 +10,10 @@
     <table class="table is-hoverable is-fullwidth">
       <thead>
         <tr>
-        <th class="has-text-centered">Code</th> 
-        <th class="has-text-centered">Name</th> 
+        <th class="has-text-centered">ID</th> 
+        <th class="has-text-centered">Project Name</th> 
         <th class="has-text-centered">Host</th>
-        <th class="has-text-centered">Country</th> 
-        <th class="has-text-centered">Date</th>
+        <th class="has-text-centered">Repository</th> 
       </tr>
     </thead> 
     
@@ -22,17 +21,16 @@
     </tfoot> 
     <tbody>
 
-
+            
         
-            {% for project in projects.items() %}
+            {% for project in projects %}
             <tr>
                 <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{ project[0] }}" >{{ project[0] }}</a></span> </div>
+                    <div class="tag is-light"><a href="/projects/{{ project[0] }}" >{{ project }}</a></span> </div>
                 </td> 
-                <td class="has-text-centered"> {{ project[1]["name"] }}</td> 
-                <td class="has-text-centered">{{ project[1]["host"] }}</span></td> 
-                <td class="has-text-centered"><span class="emoji">{{ project[1]["country"] }}</span> </td>
-                <td class="has-text-centered">{{ project[1]["date"] }}</td> 
+                <td class="has-text-centered"> {{ projects[project]["projectname"] }}</td> 
+                <td class="has-text-centered">{{ projects[project]["host"] }}</span></td> 
+                <td class="has-text-centered">{{ projects[project]["repository"] }}</td> 
                 </tr>
             
             {% endfor %}
