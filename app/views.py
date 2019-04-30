@@ -27,9 +27,9 @@ def irods_put(username,passw,filen,path):
     except KeyError:
         env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-        session.collections.create(path)
+        coll=session.collections.create(path)
         session.data_objects.put(filen,path)
-        print("irods put")
+        print("irods put complete")
 
 
 @app.route("/")
