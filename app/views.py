@@ -20,16 +20,50 @@ app.config["ALLOWED_PROJECT_EXTENSIONS"] = ["ZIP"]
 app.config["MAX_PROJECT_FILESIZE"] = 0.5 * 1024 * 1024
 
 
+def irods_getCollection(path):
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+            
+            coll = session.collections.get(path)
+            print ("Col ID: "+str(coll.id))
+            print ("Col Path: "+coll.path)
+            print (coll.metadata.items())
+            print("irods Collection Metadata View")
 
-def irods_put(username,passw,filen,path):
+
+
+def irods_createCollection(path):
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+            session.collections.create(path)
+            coll = session.collections.create(path)
+            print ("Col ID: "+str(coll.id))
+            print ("Col Path: "+coll.path)
+            coll.metadata.add("My KEY", "999")
+            print (coll.metadata.items())
+            print("irods Collection Created Complete")
+
+
+def irods_addObject(filen,Colpath):
+    username = "alice"
+    passw="alicepass"
     try:
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
         env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-        coll=session.collections.create(path)
-        session.data_objects.put(filen,path)
-        print("irods put complete")
+        session.data_objects.put(filen,Colpath)
+        print("irods Added Object")
 
 
 @app.route("/")
@@ -319,14 +353,17 @@ def upload_project():
                     
 
                     print("Project Unzipped")
+                    irods_createCollection("/tempZone/home/alice/"+req['projectname']+"/")
+                    print("Collection Created")
 
-                    for root, dirs, files in os.walk(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"):  
+                    for root, dirs,files in os.walk(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"):  
+                        print("WORKING WITH FILES")
                         for filename in files:
-                            irods_put("alice","alicepass",app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+filename,"/tempZone/home/alice/"+req['projectname']+"/")
+                            irods_addObject(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+filename,"/tempZone/home/alice/"+req['projectname']+"/")
 
                     
 
-                    
+                    irods_getCollection("/tempZone/home/alice/"+req['projectname']+"/")
                    
                     return redirect("/")
 
