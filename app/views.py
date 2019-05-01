@@ -214,7 +214,15 @@ def convert_csv(filepath):
     return samples
 
 
-
+def chunk_dict(d, chunk_size):
+    r = {}
+    for k, v in d.items():
+        if len(r) == chunk_size:
+            yield r
+            r = {}
+        r[k] = v
+    if r:
+        yield r
 
 
 
@@ -222,10 +230,10 @@ def convert_csv(filepath):
 def objectfile(projectid,fileid):
     
     filemetadata = get_file(projectid,fileid)
-    print(filemetadata)
+    filemetadata=list(chunk_dict(filemetadata, 4))
 
     if filemetadata:
-        return render_template("/public/file.html",item=filemetadata)
+        return render_template("/public/file.html",fileid=fileid,item=filemetadata)
     else:
         return redirect("/")
 
