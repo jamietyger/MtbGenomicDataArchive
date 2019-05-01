@@ -21,43 +21,35 @@ app.config["MAX_PROJECT_FILESIZE"] = 0.5 * 1024 * 1024
 
 
 def irods_getCollection(path):
-    username = "alice"
+    username = "alice"  #login creds
     passw="alicepass"
     try:
-        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE'] #get irods environment file
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session: #create irods session in zone
             
-            coll = session.collections.get(path)
-            print ("Col ID: "+str(coll.id))
-            print ("Col Path: "+coll.path)
-            print (coll.metadata.items())
-            print("irods Collection Metadata View")
+            coll = session.collections.get(path) #get collection with path
+    return coll
 
 def irodsmetaJSON(metadata):
     metadict = dict()
-    for meta in metadata:
-        metadict[meta.name]=meta.value
+    for meta in metadata: #for every metadata attribute
+        metadict[meta.name]=meta.value  #add value to dictionary
     return metadict
 
 
 def irods_createCollection(path,metadata):
-    username = "alice"
+    username = "alice" #login creds
     passw="alicepass"
     try:
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-            session.collections.create(path)
-            coll = session.collections.create(path)
-            print ("Col ID: "+str(coll.id))
-            print ("Col Path: "+coll.path)
-            for key in metadata:
-                coll.metadata.add(key,metadata[key]) 
-            
-            print (coll.metadata.items())
+            coll = session.collections.create(path) #create metadata with path
+            for key in metadata: #for every attribute in metadata
+                coll.metadata.add(key,metadata[key])  #add attribute, value to collection
             print("irods Collection Created Complete")
 
 
@@ -69,7 +61,7 @@ def irods_addObject(filen,Colpath):
     except KeyError:
         env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-        session.data_objects.put(filen,Colpath)
+        session.data_objects.put(filen,Colpath) #add file to Collection Path
         print("irods Added Object")
 
 
@@ -117,16 +109,14 @@ def projects():
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
             
-            coll = session.collections.get("/tempZone/home/alice")
+            coll = session.collections.get("/tempZone/home/alice") #get all collections 
          
-            projects = dict()
-            for col in coll.subcollections:
-                print(col.path)
-                col2=session.collections.get(col.path)
-                colmeta=col2.metadata.items()
-                print(colmeta)
-                metadata= irodsmetaJSON(colmeta)
-                projects[col.id]=metadata
+            projects = dict() #make projects dict
+            for col in coll.subcollections: 
+                col2=session.collections.get(col.path) #get collection
+                colmeta=col2.metadata.items() #get metadata
+                metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
+                projects[col.id]=metadata #add to projects dict
     print(projects)
     return render_template("public/projects.html", projects=projects)
 
