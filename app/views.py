@@ -334,27 +334,28 @@ def upload_project():
                     print("Project saved")
                     print(app.config["PROJECT_UPLOADS"]+"/"+filename)
 
-                    req = request.form
+                    req = request.form #project metadata
                     
                     
 
-                    with zipfile.ZipFile(app.config["PROJECT_UPLOADS"]+"/"+filename,"r") as zip_ref:
+                    with zipfile.ZipFile(app.config["PROJECT_UPLOADS"]+"/"+filename,"r") as zip_ref: #unzip file
                         zip_ref.extractall(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/")
                     
                     
 
                     print("Project Unzipped")
-                    irods_createCollection("/tempZone/home/alice/"+req['projectname'],req)
+                    irods_createCollection("/tempZone/home/alice/"+req['projectname'],req) #create Collection with metadata submitted
                     print("Collection Created")
 
-                    for root, dirs,files in os.walk(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"):  
-                        print("WORKING WITH FILES")
+                    for root, dirs,files in os.walk(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"):  #for every file in zip
+                        print("WORKING WITH FILES") 
                         for filename in files:
-                            irods_addObject(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+filename,"/tempZone/home/alice/"+req['projectname']+"/")
+                            irods_addObject(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+filename,"/tempZone/home/alice/"+req['projectname']+"/") #add file to collection
 
                     
-
-                    irods_getCollection("/tempZone/home/alice/"+req['projectname'])
+                    #Get Collection Path
+                    #Read metadata file
+                    #Add metadata to object
                    
                     return redirect("/")
 
