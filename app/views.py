@@ -122,38 +122,34 @@ def projects():
 
 @app.route("/projects/<projectid>")
 def project(projectid):
-    projects = {
-    "AGA000": {
-        "genome_id": "1295720.3",
-        "genome_name": "Mycobacterium tuberculosis TKK_02_0004",
-        "genome_status": "WGS",
-        "strain": "TKK_02_0004",
-        "sample_source": "sputum",
-        "sample_country": "ZA",
-        "sample_geographic_location": "Tygerberg Hospital, Western Cape",
-        "sample_collection_date": "2014-04-29",
-        "sequencing_country": "USA",
-        "sequencing_centre": "Broad Institute",
-        "sequencing_platform": "Illumina",
-        "sequencing_completion_date": "2014-12-08",
-        "phenotypic_method": "MGIT960",
-        "host_name": "Human",
-        "contigs": "6",
-        "genome_length": "4405060",
-        "gc_content": "65.6",
-        "date_uploaded": "2014-12-08"
-    }
+    
+    projectname,objects = get_project(projectid)
+    print(objects)
 
-}
-
-    item = None
-    if projectid in projects:
-        item = projects[projectid]
-        return render_template("/public/project.html", projectid=projectid,item=item)
+    if objects:
+        return render_template("/public/project.html", projectid=projectid,projectname=projectname,files=objects)
     else:
         return redirect("/")
 
 
+def get_project(projectid):
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        coll = session.collections.get("/tempZone/home/alice")
+        objects = dict() #make projects dict
+        for col in coll.subcollections:
+            if (str(col.id) == str(projectid)):
+                for obj in col.data_objects:
+                    if len(obj.metadata.items())!=0:
+                        objmeta=obj.metadata.items() #get metadata
+                        metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
+                        objects[obj.id]=metadata #add to projects dict
+                return col.name,objects
 
 @app.route("/repository")
 def repository():
@@ -197,47 +193,62 @@ def convert_csv(filepath):
     wb = xlrd.open_workbook(filepath)
     sh = wb.sheet_by_index(0) 
     # List to hold dictionaries
-    samples_list = []
     header_values = []
     # Iterate through each row in worksheet and fetch values into dict
+    samples = dict()
     for rownum in range(0, sh.nrows):
         
         if rownum == 0:
             header_values = sh.row_values(rownum)
             
         else:
-            sample = OrderedDict()
+            samplemeta = dict()
             row_values = sh.row_values(rownum)
             
-            for i in range (len(header_values)):
-                sample[header_values[i]] = row_values[i]
-            samples_list.append(sample)
+            for i in range (1,len(header_values)):
+                samplemeta[header_values[i]] = row_values[i]
+            samples[row_values[0]]=samplemeta
     # Serialize the list of dicts to JSON
-    j = json.dumps(samples_list)
-
-    return samples_list
-
-
-
-
-
-
-@app.route("/files/<sampleid>")
-def files(sampleid):
-
-    files1 = convert_csv(app.config["PROJECT_UPLOADS"]+"/"+"Tuberculosis-SANBI"+"/metadata.xlsx")
     
-    print(files1[0])
-    print(files1[0]['sample_id'])
 
-    item = None
-    if sampleid == files1[0]['sample_id']:
-        print("I AM HERE")
-        item = files1[0]
-        print (item)
-        return render_template("/public/file.html", fileid=sampleid,item=item)
+    return samples
+
+
+
+
+
+
+@app.route("/projects/<projectid>/<fileid>")
+def objectfile(projectid,fileid):
+    
+    filemetadata = get_file(projectid,fileid)
+    print(filemetadata)
+
+    if filemetadata:
+        return render_template("/public/file.html",item=filemetadata)
     else:
         return redirect("/")
+
+
+def get_file(projectid,fileid):
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        coll = session.collections.get("/tempZone/home/alice")
+        objects = dict() #make projects dict
+        for col in coll.subcollections:
+            if (str(col.id) == str(projectid)):
+                for obj in col.data_objects:
+                    if (str(obj.id) == str(fileid)):
+                        objmeta=obj.metadata.items() #get metadata
+                        metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
+                        objects=metadata #add to projects dict
+                return objects
+  
 
 
 
@@ -352,11 +363,10 @@ def upload_project():
                         for filename in files:
                             irods_addObject(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+filename,"/tempZone/home/alice/"+req['projectname']+"/") #add file to collection
 
-                    
-                    #Get Collection Path
-                    #Read metadata file
-                    #Add metadata to object
-                   
+
+                    addmetadata_objects(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+"metadata.xlsx","/tempZone/home/alice/"+req['projectname']+"/")
+                
+
                     return redirect("/")
 
                 else:
@@ -367,6 +377,20 @@ def upload_project():
     
     return render_template("public/upload_project.html", hide_button=False)
 
+def addmetadata_objects(metadata,collection):
+    files_metadata = convert_csv(metadata)
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        for files in files_metadata:
+            print(collection+files)
+            obj = session.data_objects.get(collection+files) #get file
+            for key in files_metadata[files]: #for every attribute in metadata
+                obj.metadata.add(key,str(files_metadata[files][key]))  #add attribute, value to file
 
 @app.route("/get-image/<image_name>")
 def get_image(image_name):
