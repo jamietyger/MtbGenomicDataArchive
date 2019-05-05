@@ -9,6 +9,7 @@ from collections import OrderedDict
 import simplejson as json
 import pprint
 
+
 import os
 import zipfile
 
@@ -116,6 +117,9 @@ def projects():
                 col2=session.collections.get(col.path) #get collection
                 colmeta=col2.metadata.items() #get metadata
                 metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
+                print("BEFORE")
+                metadata['path']=app.config["PROJECT_UPLOADS"]+"/"+metadata['projectname']
+                print(metadata)
                 projects[col.id]=metadata #add to projects dict
     print(projects)
     return render_template("public/projects.html", projects=projects)
@@ -150,6 +154,26 @@ def get_project(projectid):
                         metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
                         objects[obj.id]=metadata #add to projects dict
                 return col.name,objects
+
+@app.route("/download-project/<projectname>")
+def download_project(projectname):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
+    print(path)
+    zf = zipfile.ZipFile(path+".zip", "w")
+    for dirname, subdirs, files in os.walk(path):
+        zf.write(dirname)
+        for filename in files:
+            zf.write(os.path.join(dirname, filename))
+    zf.close()
+
+    print(path+".zip")
+    print(path[len("app/"):])
+
+    try:
+        return send_file(path[len("app/"):]+".zip", attachment_filename=projectname+".zip")
+    except Exception as e:
+	    return str(e)
+
 
 @app.route("/repository")
 def repository():
