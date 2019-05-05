@@ -8,7 +8,7 @@ import xlrd
 from collections import OrderedDict
 import simplejson as json
 import pprint
-
+import shutil
 
 import os
 import zipfile
@@ -159,12 +159,8 @@ def get_project(projectid):
 def download_project(projectname):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
     print(path)
-    zf = zipfile.ZipFile(path+".zip", "w")
-    for dirname, subdirs, files in os.walk(path):
-        zf.write(dirname)
-        for filename in files:
-            zf.write(os.path.join(dirname, filename))
-    zf.close()
+    print("HELLOT")
+    shutil.make_archive(app.config["PROJECT_UPLOADS"]+"/"+projectname, 'zip', path)
 
     print(path+".zip")
     print(path[len("app/"):])
