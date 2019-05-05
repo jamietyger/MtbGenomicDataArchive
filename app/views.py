@@ -170,6 +170,17 @@ def download_project(projectname):
     except Exception as e:
 	    return str(e)
 
+@app.route("/download-metadata/<projectname>")
+def download_metadata(projectname):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
+  
+    print(path+".zip")
+    print(path[len("app/"):])
+
+    try:
+        return send_file(path[len("app/"):]+"/metadata.xlsx", attachment_filename=projectname+".xlsx")
+    except Exception as e:
+	    return str(e)
 
 @app.route("/repository")
 def repository():

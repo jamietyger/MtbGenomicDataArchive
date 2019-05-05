@@ -14,7 +14,8 @@
         <th class="has-text-centered">Project Name</th> 
         <th class="has-text-centered">Host</th>
         <th class="has-text-centered">Repository</th>
-        <th class="has-text-centered">Download</th> 
+        <th class="has-text-centered">Project</th>
+        <th class="has-text-centered">Metadata</th>  
       </tr>
     </thead> 
     
@@ -39,6 +40,13 @@
                       </span>
                     </a>
                   </td>
+                  <td class="has-text-centered">
+                    <a href= "/download-metadata/{{ projects[project]["projectname"] }}" class="button">
+                        <span class="icon is-small">
+                          <i class="fas fa-download"></i>
+                        </span>
+                      </a>
+                    </td>
                 </tr>
             
             {% endfor %}
