@@ -35,8 +35,17 @@
         <a href="/repository" class="navbar-item">Repository</a>
 
   <div class="navbar-item">
-  <input size="40" name="q" maxlength="500" value="" id="search" class="input" placeholder="Search" required="required" autocomplete="off" type="search">
-  </div>
+    <form action="{{url_for('getsearch')}}" method="POST">
+        <div class="field has-addons">
+            <div class="control">
+              <input name="searched" class="input" type="text" placeholder="Find a repository">
+            </div>
+            <div class="control">
+                <button type="submit" class="button is-link">Search</button>
+            </div>
+          </div>
+</form>
+</div>
   </div>
     <div class="navbar-end">
   

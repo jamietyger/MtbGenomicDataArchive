@@ -9,17 +9,97 @@ from collections import OrderedDict
 import simplejson as json
 import pprint
 import shutil
+from flask import Flask, url_for
 
 import os
 import zipfile
 
 from irods.session import iRODSSession
+from irods.models import Collection, DataObject
+
 
 
 app.config["PROJECT_UPLOADS"] = "app/static/project/uploads"
 app.config["ALLOWED_PROJECT_EXTENSIONS"] = ["ZIP"]
 app.config["MAX_PROJECT_FILESIZE"] = 0.5 * 1024 * 1024
 
+@app.route("/search/<searchitem>")
+def search(searchitem):
+    results = irods_search(searchitem)
+    return render_template("public/search.html", searchitem=searchitem,results=results)
+
+@app.route('/search', methods=['POST'])
+def getsearch():
+    print (request.form['searched'])
+    return redirect(url_for('search', searchitem=request.form['searched']))
+
+
+def humanbytes(B):
+   'Return the given bytes as a human friendly KB, MB, GB, or TB string'
+   B = float(B)
+   KB = float(1024)
+   MB = float(KB ** 2) # 1,048,576
+   GB = float(KB ** 3) # 1,073,741,824
+   TB = float(KB ** 4) # 1,099,511,627,776
+
+   if B < KB:
+      return '{0} {1}'.format(B,'Bytes' if 0 == B > 1 else 'Byte')
+   elif KB <= B < MB:
+      return '{0:.2f} KB'.format(B/KB)
+   elif MB <= B < GB:
+      return '{0:.2f} MB'.format(B/MB)
+   elif GB <= B < TB:
+      return '{0:.2f} GB'.format(B/GB)
+   elif TB <= B:
+      return '{0:.2f} TB'.format(B/TB)
+
+def irods_search(term):
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        query = session.query(Collection.name, DataObject.id, DataObject.name, DataObject.size)
+        results = []
+        for result in query:
+                if "trash" not in result[Collection.name]:
+                        if term in result[Collection.name] or term in result[DataObject.name]:
+                                item =dict()
+                                item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
+                                item["CollectionID"]=irods_getCollection(result[Collection.name]).id
+                                item["DataObjectName"]=result[DataObject.name] #add value to dictionary
+                                item["DataObjectID"]=result[DataObject.id] #add value to dictionary
+                                item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary
+                                print('{}/{} id={} size={}'.format(result[Collection.name], result[DataObject.name], result[DataObject.id], result[DataObject.size]))        
+                                results.append(item)
+
+    return results        
+
+
+def getrepo():
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        query = session.query(Collection.name, DataObject.id, DataObject.name, DataObject.size)
+        results = []
+        for result in query:
+                if "trash" not in result[Collection.name]:
+                            item =dict()
+                            item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
+                            item["CollectionID"]=irods_getCollection(result[Collection.name]).id
+                            item["DataObjectName"]=result[DataObject.name] #add value to dictionary
+                            item["DataObjectID"]=result[DataObject.id] #add value to dictionary
+                            item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary
+                                        
+                            results.append(item)
+
+    return results        
 
 def irods_getCollection(path):
     username = "alice"  #login creds
@@ -38,7 +118,6 @@ def irodsmetaJSON(metadata):
     for meta in metadata: #for every metadata attribute
         metadict[meta.name]=meta.value  #add value to dictionary
     return metadict
-
 
 def irods_createCollection(path,metadata):
     username = "alice" #login creds
@@ -119,14 +198,13 @@ def projects():
                 metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
                 print("BEFORE")
                 metadata['path']=app.config["PROJECT_UPLOADS"]+"/"+metadata['projectname']
-                print(metadata)
                 projects[col.id]=metadata #add to projects dict
     print(projects)
     return render_template("public/projects.html", projects=projects)
 
 @app.route("/projects/<projectid>")
 def project(projectid):
-    
+    print("SPECIFIC PROJECT")
     projectname,objects = get_project(projectid)
     print(objects)
 
@@ -152,6 +230,9 @@ def get_project(projectid):
                     if len(obj.metadata.items())!=0:
                         objmeta=obj.metadata.items() #get metadata
                         metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
+                        metadata['filename']= obj.name
+                        metadata['format']=obj.name.split('.')[-1]
+                        metadata['filesize']= humanbytes(obj.size)
                         objects[obj.id]=metadata #add to projects dict
                 return col.name,objects
 
@@ -170,6 +251,21 @@ def download_project(projectname):
     except Exception as e:
 	    return str(e)
 
+
+@app.route("/download-file/<projectname>/<filename>")
+def download_file(projectname,filename):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
+  
+    print(path+".zip")
+    print(path[len("app/"):])
+
+    try:
+        return send_file(path[len("app/"):]+"/"+filename, attachment_filename=filename)
+    except Exception as e:
+	    return str(e)
+
+
+
 @app.route("/download-metadata/<projectname>")
 def download_metadata(projectname):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
@@ -184,40 +280,8 @@ def download_metadata(projectname):
 
 @app.route("/repository")
 def repository():
-
-    files = {
-    "FI0001": {
-        "repository": "SANBI - South Africa",
-        "project_id": "AGA000",
-        "genome_status": "WGS",
-        "format":"BAM",
-        "size": "5.21 GB",
-        "path": "/projects"
-        
-    },
-    "FI0002": {
- "repository": "SANBI - South Africa",
-        "project_id": "AGA000",
-        "genome_status": "WGS",
-        "format":"BAM",
-        "size": "5.21 GB",
-        "path": "/projects"
-    },
-    "FI0003": {
-        "repository": "SANBI - South Africa",
-        "project_id": "AGA000",
-        "genome_status": "WGS",
-        "format":"BAM",
-        "size": "5.21 GB",
-        "path": "/projects"
-    }
-    }
-
-
-
-
-
-    return render_template("public/repository.html",files=files)
+    results = getrepo()
+    return render_template("public/repository.html",results=results)
 
 
 def convert_csv(filepath):
@@ -260,10 +324,12 @@ def chunk_dict(d, chunk_size):
 def objectfile(projectid,fileid):
     
     filemetadata = get_file(projectid,fileid)
+    filename=filemetadata['filename']
+    filemetadata.pop('filename', None)
     filemetadata=list(chunk_dict(filemetadata, 4))
 
     if filemetadata:
-        return render_template("/public/file.html",fileid=fileid,item=filemetadata)
+        return render_template("/public/file.html",filedid=fileid,filename=filename,item=filemetadata)
     else:
         return redirect("/")
 
@@ -284,64 +350,14 @@ def get_file(projectid,fileid):
                     if (str(obj.id) == str(fileid)):
                         objmeta=obj.metadata.items() #get metadata
                         metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
+                        metadata['filename']= obj.name
                         objects=metadata #add to projects dict
                 return objects
   
 
 
 
-@app.route("/json", methods=["POST"])
-def json_example():
 
-    if request.is_json:
-
-        req = request.get_json()
-
-        response_body = {
-            "message": "JSON received!",
-            "sender": req.get("name")
-        }
-
-        res = make_response(jsonify(response_body), 200)
-
-        return res
-
-    else:
-
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
-
-@app.route("/guestbook")
-def guestbook():
-    return render_template("public/guestbook.html")
-
-@app.route("/guestbook/create-entry", methods=["POST"])
-def create_entry():
-
-    req = request.get_json()
-
-    print(req)
-
-    res = make_response(jsonify(req), 200)
-
-    return res
-
-@app.route("/query")
-def query():
-
-    if request.args:
-
-        # We have our query string nicely serialized as a Python dictionary
-        args = request.args
-
-        # We'll create a string to display the parameters & values
-        serialized = ", ".join(f"{k}: {v}" for k, v in request.args.items())
-
-        # Display the query string to the client in a different format
-        return f"(Query) {serialized}", 200
-
-    else:
-
-        return "No query string received", 200 
 
 def allowed_project(filename):
 
