@@ -300,7 +300,7 @@ def convert_csv(filepath):
             samplemeta = dict()
             row_values = sh.row_values(rownum)
             
-            for i in range (1,len(header_values)):
+            for i in range (0,len(header_values)):
                 samplemeta[header_values[i]] = row_values[i]
             samples[row_values[0]]=samplemeta
     # Serialize the list of dicts to JSON
@@ -418,7 +418,7 @@ def upload_project():
                     print("Collection Created")
 
                     # create Collection for each sample in metadata
-                    createsample_collections(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+"metadata.xlsx","/tempZone/home/alice/"+req['projectname']+"/") 
+                    createsample_collections(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/","/tempZone/home/alice/"+req['projectname']+"/") 
 
                 
 
@@ -432,8 +432,8 @@ def upload_project():
     
     return render_template("public/upload_project.html", hide_button=False)
 
-def createsample_collections(metadata,collection):
-    samples_metadata = convert_csv(metadata)
+def createsample_collections(originpath,collection):
+    samples_metadata = convert_csv(originpath+"metadata.xlsx")
     username = "alice"   #login
     passw="alicepass"
     try:
@@ -442,8 +442,21 @@ def createsample_collections(metadata,collection):
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         for sample in samples_metadata: 
-            print(collection+str(samples_metadata[sample]['sample_id']))
-            irods_createCollection(collection+str(samples_metadata[sample]['sample_id']),samples_metadata[sample])
+            col_path=collection+str(samples_metadata[sample]['sample_id'])
+            print("COLLECTION PATH")
+            print(col_path)
+            print("FILE PATH")
+            print(originpath+str(samples_metadata[sample]['BAMfilename']))
+            irods_createCollection(col_path,samples_metadata[sample])
+
+            if str(samples_metadata[sample]['BAMfilename'])!="NULL":
+                session.data_objects.put(originpath+str(samples_metadata[sample]['BAMfilename']),col_path+"/")
+            if str(samples_metadata[sample]['VCFfilename'])!="NULL":
+                session.data_objects.put(originpath+str(samples_metadata[sample]['VCFfilename']),col_path+"/")
+            if str(samples_metadata[sample]['FASTQ_r1filename'])!="NULL":
+                session.data_objects.put(originpath+str(samples_metadata[sample]['FASTQ_r1filename']),col_path+"/")
+            if str(samples_metadata[sample]['FASTQ_r2filename'])!="NULL":
+                session.data_objects.put(originpath+str(samples_metadata[sample]['FASTQ_r2filename']),col_path+"/")
             #obj = session.data_objects.get(collection+sample) #get sample
             #for key in samples_metadata[sample]: #for every attribute in metadata
              #   obj.metadata.add(key,str(samples_metadata[sample][key]))  #add attribute, value to file
