@@ -127,9 +127,9 @@ def irods_createCollection(path,metadata):
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-            coll = session.collections.create(path) #create metadata with path
+            coll = session.collections.create(path) #create collection with path
             for key in metadata: #for every attribute in metadata
-                coll.metadata.add(key,metadata[key])  #add attribute, value to collection
+                coll.metadata.add(key,str(metadata[key]))  #add attribute, value to collection
             print("irods Collection Created Complete")
 
 
@@ -378,25 +378,30 @@ def allowed_project_filesize(filesize):
     else:
         return False
 
+### Uploading Project
+
+#Takes in Zip file
+
+
 @app.route("/upload-project", methods=["GET", "POST"])
 def upload_project():
   
-    if request.method == "POST":
+    if request.method == "POST": #If project being uploaded
 
         if request.files:
                 
-                project = request.files["project"]
+                project = request.files["project"] #get files
 
-                if project.filename == "":
+                if project.filename == "":  #check if project file has no name
                     print("No filename")
                     return redirect(request.url)
 
-                if allowed_project(project.filename):
+                if allowed_project(project.filename): #make sure project size is acceptable
                     filename = secure_filename(project.filename)
 
                     project.save(os.path.join(app.config["PROJECT_UPLOADS"], filename))
 
-                    print("Project saved")
+                    print("Project saved")    #SAVE PROJECT to Disk
                     print(app.config["PROJECT_UPLOADS"]+"/"+filename)
 
                     req = request.form #project metadata
@@ -409,16 +414,12 @@ def upload_project():
                     
 
                     print("Project Unzipped")
-                    irods_createCollection("/tempZone/home/alice/"+req['projectname'],req) #create Collection with metadata submitted
+                    irods_createCollection("/tempZone/home/alice/"+req['projectname'],req) #create Project Collection with metadata submitted
                     print("Collection Created")
 
-                    for root, dirs,files in os.walk(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"):  #for every file in zip
-                        print("WORKING WITH FILES") 
-                        for filename in files:
-                            irods_addObject(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+filename,"/tempZone/home/alice/"+req['projectname']+"/") #add file to collection
+                    # create Collection for each sample in metadata
+                    createsample_collections(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+"metadata.xlsx","/tempZone/home/alice/"+req['projectname']+"/") 
 
-
-                    addmetadata_objects(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/"+"metadata.xlsx","/tempZone/home/alice/"+req['projectname']+"/")
                 
 
                     return redirect("/")
@@ -430,6 +431,26 @@ def upload_project():
         
     
     return render_template("public/upload_project.html", hide_button=False)
+
+def createsample_collections(metadata,collection):
+    samples_metadata = convert_csv(metadata)
+    username = "alice"   #login
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        for sample in samples_metadata: 
+            print(collection+str(samples_metadata[sample]['sample_id']))
+            irods_createCollection(collection+str(samples_metadata[sample]['sample_id']),samples_metadata[sample])
+            #obj = session.data_objects.get(collection+sample) #get sample
+            #for key in samples_metadata[sample]: #for every attribute in metadata
+             #   obj.metadata.add(key,str(samples_metadata[sample][key]))  #add attribute, value to file
+
+
+
+
 
 def addmetadata_objects(metadata,collection):
     files_metadata = convert_csv(metadata)
@@ -446,72 +467,3 @@ def addmetadata_objects(metadata,collection):
             for key in files_metadata[files]: #for every attribute in metadata
                 obj.metadata.add(key,str(files_metadata[files][key]))  #add attribute, value to file
 
-@app.route("/get-image/<image_name>")
-def get_image(image_name):
-
-    try:
-        return send_from_directory(app.config["CLIENT_IMAGES"], filename=image_name, as_attachment=True)
-    except FileNotFoundError:
-        abort(404)
-
-@app.route("/get-report/<path:path>")
-def get_report(path):
-
-    try:
-        return send_from_directory(app.config["CLIENT_REPORTS"], filename=path, as_attachment=True)
-    except FileNotFoundError:
-        abort(404)
-
-@app.route("/jinja")
-def jinja():
-    # Strings
-    my_name = "Julian"
-
-    # Integers
-    my_age = 30
-
-    # Lists
-    langs = ["Python", "JavaScript", "Bash", "Ruby", "C", "Rust"]
-
-    # Dictionaries
-    friends = {
-        "Tony": 43,
-        "Cody": 28,
-        "Amy": 26,
-        "Clarissa": 23,
-        "Wendell": 39
-    }
-
-    # Tuples
-    colors = ("Red", "Blue")
-
-    # Booleans
-    cool = True
-
-    # Classes
-    class GitRemote:
-        def __init__(self, name, description, domain):
-            self.name = name
-            self.description = description 
-            self.domain = domain
-
-        def clone(self, repo):
-            return f"Cloning into {repo}"
-
-    my_remote = GitRemote(
-        name="Learning Flask",
-        description="Learn the Flask web framework for Python",
-        domain="https://github.com/Julian-Nash/learning-flask.git"
-    )
-
-    # Functions
-    def repeat(x, qty=1):
-        return x * qty
-
-
-
-    return render_template(
-    "public/jinja.html", my_name=my_name, my_age=my_age, langs=langs,
-    friends=friends, colors=colors, cool=cool, GitRemote=GitRemote, 
-    my_remote=my_remote, repeat=repeat
-    )
