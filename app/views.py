@@ -209,7 +209,7 @@ def project(projectid):
     print(objects)
 
     if objects:
-        return render_template("/public/project.html", projectid=projectid,projectname=projectname,files=objects)
+        return render_template("/public/project.html", projectid=projectid,projectname=projectname,samples=objects)
     else:
         return redirect("/")
 
@@ -224,16 +224,19 @@ def get_project(projectid):
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         coll = session.collections.get("/tempZone/home/alice")
         objects = dict() #make projects dict
+        print("ALL PROJECTS")
+        print(coll.subcollections)
         for col in coll.subcollections:
+            print(col)
             if (str(col.id) == str(projectid)):
-                for obj in col.data_objects:
-                    if len(obj.metadata.items())!=0:
-                        objmeta=obj.metadata.items() #get metadata
+                print("IAMHEREIF")
+                for sample in col.subcollections:
+                    print("IAMHERE")
+                    if len(sample.metadata.items())!=0:
+                        objmeta=sample.metadata.items() #get metadata
                         metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
-                        metadata['filename']= obj.name
-                        metadata['format']=obj.name.split('.')[-1]
-                        metadata['filesize']= humanbytes(obj.size)
-                        objects[obj.id]=metadata #add to projects dict
+                        metadata['samplename']= sample.name
+                        objects[sample.id]=metadata #add to projects dict
                 return col.name,objects
 
 @app.route("/download-project/<projectname>")
@@ -451,10 +454,13 @@ def createsample_collections(originpath,collection):
 
             if str(samples_metadata[sample]['BAMfilename'])!="NULL":
                 session.data_objects.put(originpath+str(samples_metadata[sample]['BAMfilename']),col_path+"/")
+
             if str(samples_metadata[sample]['VCFfilename'])!="NULL":
                 session.data_objects.put(originpath+str(samples_metadata[sample]['VCFfilename']),col_path+"/")
+
             if str(samples_metadata[sample]['FASTQ_r1filename'])!="NULL":
                 session.data_objects.put(originpath+str(samples_metadata[sample]['FASTQ_r1filename']),col_path+"/")
+
             if str(samples_metadata[sample]['FASTQ_r2filename'])!="NULL":
                 session.data_objects.put(originpath+str(samples_metadata[sample]['FASTQ_r2filename']),col_path+"/")
             #obj = session.data_objects.get(collection+sample) #get sample

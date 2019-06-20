@@ -10,12 +10,10 @@
     <table class="table is-hoverable is-fullwidth">
       <thead>
         <tr>
-        <th class="has-text-centered">File ID</th> 
-        <th class="has-text-centered">Filename</th> 
+        <th class="has-text-centered">Sample ID</th> 
+        <th class="has-text-centered">Sample name</th> 
         <th class="has-text-centered">Sequencing Center</th> 
         <th class="has-text-centered">Accession Number</th>
-        <th class="has-text-centered">Format</th>
-        <th class="has-text-centered">Size</th>
         <th class="has-text-centered">Download</th>
       </tr>
     </thead> 
@@ -26,18 +24,17 @@
 
 
         
-            {% for file in files.items() %}
+            {% for sample in samples.items() %}
             <tr>
                 <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{projectid}}/{{ file[0] }}" >{{ file[0] }}</a></span> </div>
+                    <div class="tag is-light"><a href="/projects/{{projectid}}/{{ sample[0] }}" >{{ sample[0] }}</a></span> </div>
                 </td> 
-                <td class="has-text-centered"> {{ file[1]["filename"] }}</td>  
-                <td class="has-text-centered">{{ file[1]["sequencing_center"] }}</td>
-                <td class="has-text-centered">{{ file[1]["accession_number"] }}</td>
-                <td class="has-text-centered">{{ file[1]["format"] }}</td> 
-                <td class="has-text-centered">{{ file[1]["filesize"] }}</td> 
+                <td class="has-text-centered"> {{ sample[1]["samplename"] }}</td>  
+                <td class="has-text-centered">{{ sample[1]["sequencing_center"] }}</td>
+                <td class="has-text-centered">{{ sample[1]["accession_number"] }}</td>
+              
                 <td class="has-text-centered">
-                  <a href= "/download-file/{{ projectname }}/{{ file[1]["filename"] }}" class="button">
+                  <a href= "/download-file/{{ projectname }}/{{ sample[1]["samplename"] }}" class="button">
                       <span class="icon is-small">
                         <i class="fas fa-download"></i>
                       </span>
