@@ -10,6 +10,7 @@ import simplejson as json
 import pprint
 import shutil
 from flask import Flask, url_for
+from os.path import basename
 
 import os
 import zipfile
@@ -21,6 +22,7 @@ from irods.models import Collection, DataObject
 
 
 app.config["PROJECT_UPLOADS"] = "app/static/project/uploads"
+app.config["PROJECT_DOWNLOADS"] = "app/static/project/downloads"
 app.config["ALLOWED_PROJECT_EXTENSIONS"] = ["ZIP"]
 app.config["MAX_PROJECT_FILESIZE"] = 0.5 * 1024 * 1024
 
@@ -201,9 +203,10 @@ def get_project(projectid):
         for col in coll.subcollections:
             print(col)
             if (str(col.id) == str(projectid)):
-                print("IAMHEREIF")
+   
                 for sample in col.subcollections:
-                    print("IAMHERE")
+                  
+
                     if len(sample.metadata.items())!=0:
                         objmeta=sample.metadata.items() #get metadata
                         metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
@@ -228,7 +231,7 @@ def download_project(projectname):
 
 
 @app.route("/download-sample/<projectname>/<samplename>")
-def download_sample(projectname,samplename):
+def download_samplet(projectname,samplename):
     colpath="/tempZone/home/alice/"+projectname+"/"+samplename
     
     col = irods_getCollection(colpath)
@@ -238,21 +241,21 @@ def download_sample(projectname,samplename):
     print("DOWNLOADING")
     print(files)
     filepath=app.config["PROJECT_UPLOADS"]+"/"+projectname
-
+    dfilepath=app.config["PROJECT_DOWNLOADS"]
     #create a ZipFile object
-    zipObj = ZipFile(filepath+"/"+samplename+".zip", 'w')
+    zipObj = ZipFile(dfilepath+"/"+samplename+".zip", 'w')
  
     # Add multiple files to the zip
     for sfile in files:
         if sfile != "NULL":
-            zipObj.write(filepath[:]+"/"+sfile)
+            zipObj.write(filepath[:]+"/"+sfile,basename(filepath[:]+"/"+sfile))
   
  
     # close the Zip File
     zipObj.close()
    
     try:
-        return send_file(filepath[len("app/"):]+"/"+samplename+".zip", attachment_filename=samplename+".zip")
+        return send_file(dfilepath[len("app/"):]+"/"+samplename+".zip", attachment_filename=samplename+".zip")
     except Exception as e:
 	    return str(e)
 
