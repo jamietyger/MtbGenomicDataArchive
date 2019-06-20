@@ -1,0 +1,84 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}{{ samplename }}{% endblock %}
+{% block heading %}{{ samplename }}{% endblock %}
+
+{% block main %}
+<div class="container">
+
+    <div class="box" style="margin-bottom: 2em;">
+      <p>Download</p>
+        <table class="table is-hoverable is-fullwidth">
+          <thead>
+            <tr>
+
+            {% for key in files %}
+            <th class="has-text-centered">{{key}}</th> 
+            {% endfor %}
+          </tr>
+        </thead> 
+        
+        <tfoot>
+        </tfoot> 
+        <tbody>
+            <tr>
+              {% for key in files %}
+                <td class="has-text-centered">
+                    
+                    <a href= "/download-samplefile/{{ origin }}/{{ files[key] }}" class="button">
+                      <span class="icon is-small">
+                        <i class="fas fa-download"></i>
+                      </span>
+                    </a>
+
+                </td> 
+                {% endfor %}
+
+            </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+
+{% for box in item %}
+
+
+  
+    <div class="box" style="margin-bottom: 2em;">
+          <table class="table is-hoverable is-fullwidth">
+            <thead>
+              <tr>
+
+              {% for key in box %}
+              <th class="has-text-centered">{{key}}</th> 
+              {% endfor %}
+            </tr>
+          </thead> 
+          
+          <tfoot>
+          </tfoot> 
+          <tbody>
+              <tr>
+                {% for key in box %}
+                  <td class="has-text-centered">{{ box[key] }}</td> 
+                  {% endfor %}
+
+              </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      {% endfor %}
+
+
+
+
+        
+</div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

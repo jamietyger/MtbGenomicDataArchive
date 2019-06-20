@@ -13,6 +13,7 @@ from flask import Flask, url_for
 
 import os
 import zipfile
+from zipfile import ZipFile
 
 from irods.session import iRODSSession
 from irods.models import Collection, DataObject
@@ -149,35 +150,6 @@ def irods_addObject(filen,Colpath):
 def index():
     return render_template("public/index.html")
 
-@app.route("/about")
-def about():
-    return """
-    <h1 style='color: red;'>I'm a red H1 heading!</h1>
-    <p>This is a lovely little paragraph</p>
-    <code>Flask is <em>awesome</em></code>
-    """
-
-@app.route("/sign-up", methods=["GET", "POST"])
-def sign_up():
-
-    if request.method == "POST":
-
-        req = request.form
-        print(req)
-
-        missing = list()
-
-        for k, v in req.items():
-            if v == "":
-                missing.append(k)
-
-        if missing:
-            feedback = f"Missing fields for {', '.join(missing)}"
-            return render_template("public/sign_up.html", feedback=feedback)
-
-        return redirect(request.url)
-
-    return render_template("public/sign_up.html")
 
 @app.route("/projects")
 def projects():
@@ -255,19 +227,46 @@ def download_project(projectname):
 	    return str(e)
 
 
-@app.route("/download-file/<projectname>/<filename>")
-def download_file(projectname,filename):
+@app.route("/download-sample/<projectname>/<samplename>")
+def download_sample(projectname,samplename):
+    colpath="/tempZone/home/alice/"+projectname+"/"+samplename
+    
+    col = irods_getCollection(colpath)
+    objmeta=col.metadata.items() #get metadata
+    metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
+    files =[metadata['BAMfilename'],metadata['VCFfilename'],metadata['FASTQ_r1filename'],metadata['FASTQ_r2filename']]
+    print("DOWNLOADING")
+    print(files)
+    filepath=app.config["PROJECT_UPLOADS"]+"/"+projectname
+
+    #create a ZipFile object
+    zipObj = ZipFile(filepath+"/"+samplename+".zip", 'w')
+ 
+    # Add multiple files to the zip
+    for sfile in files:
+        if sfile != "NULL":
+            zipObj.write(filepath[:]+"/"+sfile)
+  
+ 
+    # close the Zip File
+    zipObj.close()
+   
+    try:
+        return send_file(filepath[len("app/"):]+"/"+samplename+".zip", attachment_filename=samplename+".zip")
+    except Exception as e:
+	    return str(e)
+
+@app.route("/download-samplefile/<projectname>/<samplefilename>")
+def download_samplefile(projectname,samplefilename):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
   
     print(path+".zip")
     print(path[len("app/"):])
 
     try:
-        return send_file(path[len("app/"):]+"/"+filename, attachment_filename=filename)
+        return send_file(path[len("app/"):]+"/"+samplefilename, attachment_filename=samplefilename)
     except Exception as e:
 	    return str(e)
-
-
 
 @app.route("/download-metadata/<projectname>")
 def download_metadata(projectname):
@@ -323,21 +322,37 @@ def chunk_dict(d, chunk_size):
         yield r
 
 
-@app.route("/projects/<projectid>/<fileid>")
-def objectfile(projectid,fileid):
+@app.route("/projects/<projectid>/<sampleid>")
+def objectfile(projectid,sampleid):
     
-    filemetadata = get_file(projectid,fileid)
-    filename=filemetadata['filename']
-    filemetadata.pop('filename', None)
-    filemetadata=list(chunk_dict(filemetadata, 4))
+    samplemetadata = get_sample(projectid,sampleid)
+    samplename=samplemetadata['samplename']
+    origin = samplemetadata['origin'].split('/')[-2]
+    files ={}
+    if samplemetadata['BAMfilename']!="NULL":
+        files['BAM File']=samplemetadata['BAMfilename']
+    if samplemetadata['VCFfilename']!="NULL":
+        files['VCF File']=samplemetadata['VCFfilename']
+    if samplemetadata['FASTQ_r1filename']!="NULL":
+        files['FASTQ - r1']=samplemetadata['FASTQ_r1filename']
+    if samplemetadata['FASTQ_r2filename']!="NULL":
+        files['FASTQ - r2']=samplemetadata['FASTQ_r2filename']
+   
+  
 
-    if filemetadata:
-        return render_template("/public/file.html",filedid=fileid,filename=filename,item=filemetadata)
+
+    print(samplemetadata)
+
+    samplemetadata.pop('samplename', None)
+    samplemetadata=list(chunk_dict(samplemetadata, 4))
+
+    if samplemetadata:
+        return render_template("/public/sample.html",sampleid=sampleid,samplename=samplename,item=samplemetadata,files=files,origin=origin)
     else:
         return redirect("/")
 
 
-def get_file(projectid,fileid):
+def get_sample(projectid,fileid):
     username = "alice"
     passw="alicepass"
     try:
@@ -349,15 +364,16 @@ def get_file(projectid,fileid):
         objects = dict() #make projects dict
         for col in coll.subcollections:
             if (str(col.id) == str(projectid)):
-                for obj in col.data_objects:
-                    if (str(obj.id) == str(fileid)):
-                        objmeta=obj.metadata.items() #get metadata
+                for sample in col.subcollections:
+                    if (str(sample.id) == str(fileid)):
+                        objmeta=sample.metadata.items() #get metadata
                         metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
-                        metadata['filename']= obj.name
+                        metadata['samplename']= sample.name
                         objects=metadata #add to projects dict
                 return objects
   
 
+       
 
 
 
@@ -437,6 +453,7 @@ def upload_project():
 
 def createsample_collections(originpath,collection):
     samples_metadata = convert_csv(originpath+"metadata.xlsx")
+    
     username = "alice"   #login
     passw="alicepass"
     try:
@@ -450,6 +467,7 @@ def createsample_collections(originpath,collection):
             print(col_path)
             print("FILE PATH")
             print(originpath+str(samples_metadata[sample]['BAMfilename']))
+            samples_metadata[sample]['origin']=collection
             irods_createCollection(col_path,samples_metadata[sample])
 
             if str(samples_metadata[sample]['BAMfilename'])!="NULL":
