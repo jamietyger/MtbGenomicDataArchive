@@ -17,7 +17,9 @@ import zipfile
 from zipfile import ZipFile
 
 from irods.session import iRODSSession
-from irods.models import Collection, DataObject
+from irods.models import Collection, DataObject, CollectionMeta
+from irods.column import Criterion
+
 
 
 
@@ -33,7 +35,6 @@ def search(searchitem):
 
 @app.route('/search', methods=['POST'])
 def getsearch():
-    print (request.form['searched'])
     return redirect(url_for('search', searchitem=request.form['searched']))
 
 
@@ -64,19 +65,33 @@ def irods_search(term):
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-        query = session.query(Collection.name, DataObject.id, DataObject.name, DataObject.size)
-        results = []
+        query = session.query(Collection.name,DataObject)
+        results = {}
         for result in query:
-                if "trash" not in result[Collection.name]:
-                        if term in result[Collection.name] or term in result[DataObject.name]:
-                                item =dict()
-                                item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
-                                item["CollectionID"]=irods_getCollection(result[Collection.name]).id
-                                item["DataObjectName"]=result[DataObject.name] #add value to dictionary
-                                item["DataObjectID"]=result[DataObject.id] #add value to dictionary
-                                item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary
-                                print('{}/{} id={} size={}'.format(result[Collection.name], result[DataObject.name], result[DataObject.id], result[DataObject.size]))        
-                                results.append(item)
+            if "trash" not in result[Collection.name]:
+                if term in result[Collection.name]: #or term in result[CollectionMeta.value]:
+                    item =dict()
+                    item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
+                    item["CollectionPath"]=result[Collection.name]
+                    item["CollectionID"]=irods_getCollection(result[Collection.name]).id
+                    item["CollectionOriginID"]=irods_getCollection(item["CollectionPath"].rsplit('/', 1)[0]).id
+                    item["DataObjectName"]=result[DataObject.name] #add value to dictionary
+                    item["DataObjectID"]=result[DataObject.id] #add value to dictionary
+                    item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary       
+                    results[result[DataObject.id]]=item
+     
+                         
+        queryZone = session.query(Collection, CollectionMeta).filter(Criterion('=', CollectionMeta.name, 'repository')).filter(Criterion('like', CollectionMeta.value, term))
+
+        for result in queryZone:
+            if "trash" not in result[Collection.name]:
+                item =dict()
+                item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
+                item["CollectionID"]=irods_getCollection(result[Collection.name]).id
+                item["CollectionPath"]=result[Collection.name]
+                item["CollectionOriginID"]=irods_getCollection(result[Collection.name]).id      
+                results[result[Collection.name]]=item
+    
 
     return results        
 
@@ -170,18 +185,13 @@ def projects():
                 col2=session.collections.get(col.path) #get collection
                 colmeta=col2.metadata.items() #get metadata
                 metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
-                print("BEFORE")
                 metadata['path']=app.config["PROJECT_UPLOADS"]+"/"+metadata['projectname']
                 projects[col.id]=metadata #add to projects dict
-    print(projects)
     return render_template("public/projects.html", projects=projects)
 
 @app.route("/projects/<projectid>")
 def project(projectid):
-    print("SPECIFIC PROJECT")
     projectname,objects = get_project(projectid)
-    print(objects)
-
     if objects:
         return render_template("/public/project.html", projectid=projectid,projectname=projectname,samples=objects)
     else:
@@ -198,10 +208,9 @@ def get_project(projectid):
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         coll = session.collections.get("/tempZone/home/alice")
         objects = dict() #make projects dict
-        print("ALL PROJECTS")
-        print(coll.subcollections)
+
         for col in coll.subcollections:
-            print(col)
+       
             if (str(col.id) == str(projectid)):
    
                 for sample in col.subcollections:
@@ -217,12 +226,10 @@ def get_project(projectid):
 @app.route("/download-project/<projectname>")
 def download_project(projectname):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
-    print(path)
-    print("HELLOT")
+ 
     shutil.make_archive(app.config["PROJECT_UPLOADS"]+"/"+projectname, 'zip', path)
 
-    print(path+".zip")
-    print(path[len("app/"):])
+
 
     try:
         return send_file(path[len("app/"):]+".zip", attachment_filename=projectname+".zip")
@@ -238,8 +245,6 @@ def download_samplet(projectname,samplename):
     objmeta=col.metadata.items() #get metadata
     metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
     files =[metadata['BAMfilename'],metadata['VCFfilename'],metadata['FASTQ_r1filename'],metadata['FASTQ_r2filename']]
-    print("DOWNLOADING")
-    print(files)
     filepath=app.config["PROJECT_UPLOADS"]+"/"+projectname
     dfilepath=app.config["PROJECT_DOWNLOADS"]
     #create a ZipFile object
@@ -262,9 +267,6 @@ def download_samplet(projectname,samplename):
 @app.route("/download-samplefile/<projectname>/<samplefilename>")
 def download_samplefile(projectname,samplefilename):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
-  
-    print(path+".zip")
-    print(path[len("app/"):])
 
     try:
         return send_file(path[len("app/"):]+"/"+samplefilename, attachment_filename=samplefilename)
@@ -274,9 +276,6 @@ def download_samplefile(projectname,samplefilename):
 @app.route("/download-metadata/<projectname>")
 def download_metadata(projectname):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
-  
-    print(path+".zip")
-    print(path[len("app/"):])
 
     try:
         return send_file(path[len("app/"):]+"/metadata.xlsx", attachment_filename=projectname+".xlsx")
@@ -341,11 +340,6 @@ def objectfile(projectid,sampleid):
     if samplemetadata['FASTQ_r2filename']!="NULL":
         files['FASTQ - r2']=samplemetadata['FASTQ_r2filename']
    
-  
-
-
-    print(samplemetadata)
-
     samplemetadata.pop('samplename', None)
     samplemetadata=list(chunk_dict(samplemetadata, 4))
 
@@ -466,10 +460,7 @@ def createsample_collections(originpath,collection):
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         for sample in samples_metadata: 
             col_path=collection+str(samples_metadata[sample]['sample_id'])
-            print("COLLECTION PATH")
-            print(col_path)
-            print("FILE PATH")
-            print(originpath+str(samples_metadata[sample]['BAMfilename']))
+
             samples_metadata[sample]['origin']=collection
             irods_createCollection(col_path,samples_metadata[sample])
 
@@ -502,7 +493,6 @@ def addmetadata_objects(metadata,collection):
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         for files in files_metadata:
-            print(collection+files)
             obj = session.data_objects.get(collection+files) #get file
             for key in files_metadata[files]: #for every attribute in metadata
                 obj.metadata.add(key,str(files_metadata[files][key]))  #add attribute, value to file
