@@ -12,7 +12,8 @@
         <tr>
         <th class="has-text-centered">Project ID</th> 
         <th class="has-text-centered">Project Name</th> 
-        <th class="has-text-centered">Host</th>
+        <th class="has-text-centered">Species</th>
+        <th class="has-text-centered">Category</th>
         <th class="has-text-centered">Repository</th>
         <th class="has-text-centered">Project</th>
         <th class="has-text-centered">Metadata</th>  
@@ -32,6 +33,7 @@
                 </td> 
                 <td class="has-text-centered"> {{ projects[project]["projectname"] }}</td> 
                 <td class="has-text-centered">{{ projects[project]["host"] }}</span></td> 
+                <td class="has-text-centered">{{ projects[project]["category"] }}</span></td> 
                 <td class="has-text-centered">{{ projects[project]["repository"] }}</td> 
                 <td class="has-text-centered">
                   <a href= "/download-project/{{ projects[project]["projectname"] }}" class="button">

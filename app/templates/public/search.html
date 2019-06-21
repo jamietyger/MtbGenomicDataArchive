@@ -27,17 +27,17 @@
             {% for item in results %}
             <tr>
                 <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{ item["CollectionID"] }}" >{{ item["CollectionID"] }}</a></span> </div>
+                    <div class="tag is-light"><a href="/projects/{{ results[item]["CollectionOriginID"] }}" >{{ results[item]["CollectionOriginID"] }}</a></span> </div>
                 </td> 
-                <td class="has-text-centered"> {{ item["CollectionName"] }}</td> 
+                <td class="has-text-centered"> {{ results[item]["CollectionName"] }}</td> 
                 </td> 
                 <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{item["CollectionID"]}}/{{ item["DataObjectID"] }}" >{{ item["DataObjectID"] }}</a></span> </div>
+                    <div class="tag is-light"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{results[item]["CollectionID"]}}" >{{ results[item]["DataObjectID"] }}</a></span> </div>
                 </td> 
                 </td> 
                
-                <td class="has-text-centered">{{ item["DataObjectName"] }}</span></td> 
-                <td class="has-text-centered">{{ item["DataObjectSize"] }}</td> 
+                <td class="has-text-centered">{{ results[item]["DataObjectName"] }}</span></td> 
+                <td class="has-text-centered">{{ results[item]["DataObjectSize"] }}</td> 
              
             
                 </tr>
