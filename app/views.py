@@ -104,18 +104,19 @@ def getrepo():
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-        query = session.query(Collection.name, DataObject.id, DataObject.name, DataObject.size)
-        results = []
+        query = session.query(Collection, DataObject)
+        results = {}
         for result in query:
-                if "trash" not in result[Collection.name]:
-                            item =dict()
-                            item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
-                            item["CollectionID"]=irods_getCollection(result[Collection.name]).id
-                            item["DataObjectName"]=result[DataObject.name] #add value to dictionary
-                            item["DataObjectID"]=result[DataObject.id] #add value to dictionary
-                            item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary
-                                        
-                            results.append(item)
+            if "trash" not in result[Collection.name]:
+                item =dict()
+                item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
+                item["CollectionPath"]=result[Collection.name]
+                item["CollectionID"]=irods_getCollection(result[Collection.name]).id
+                item["CollectionOriginID"]=irods_getCollection(item["CollectionPath"].rsplit('/', 1)[0]).id
+                item["DataObjectName"]=result[DataObject.name] #add value to dictionary
+                item["DataObjectID"]=result[DataObject.id] #add value to dictionary
+                item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary  
+                results[result[DataObject.id]]=item
 
     return results        
 
