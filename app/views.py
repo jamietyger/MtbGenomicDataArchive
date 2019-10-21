@@ -64,7 +64,7 @@ def irods_search(term):
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
         query = session.query(Collection.name,DataObject)
         results = {}
         for result in query:
@@ -103,7 +103,7 @@ def getrepo():
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
         query = session.query(Collection, DataObject)
         results = {}
         for result in query:
@@ -127,7 +127,7 @@ def irods_getCollection(path):
         env_file = os.environ['IRODS_ENVIRONMENT_FILE'] #get irods environment file
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session: #create irods session in zone
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session: #create irods session in zone
             
             coll = session.collections.get(path) #get collection with path
     return coll
@@ -145,7 +145,7 @@ def irods_createCollection(path,metadata):
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
             coll = session.collections.create(path) #create collection with path
             for key in metadata: #for every attribute in metadata
                 coll.metadata.add(key,str(metadata[key]))  #add attribute, value to collection
@@ -159,7 +159,7 @@ def irods_addObject(filen,Colpath):
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
         env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
         session.data_objects.put(filen,Colpath) #add file to Collection Path
         print("irods Added Object")
 
@@ -177,9 +177,9 @@ def projects():
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
             
-            coll = session.collections.get("/tempZone/home/alice") #get all collections 
+            coll = session.collections.get("/irods_1zone/home/alice") #get all collections 
          
             projects = dict() #make projects dict
             for col in coll.subcollections: 
@@ -206,8 +206,8 @@ def get_project(projectid):
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-        coll = session.collections.get("/tempZone/home/alice")
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
+        coll = session.collections.get("/irods_1zone/home/alice")
         objects = dict() #make projects dict
 
         for col in coll.subcollections:
@@ -240,7 +240,7 @@ def download_project(projectname):
 
 @app.route("/download-sample/<projectname>/<samplename>")
 def download_samplet(projectname,samplename):
-    colpath="/tempZone/home/alice/"+projectname+"/"+samplename
+    colpath="/irods_1zone/home/alice/"+projectname+"/"+samplename
     
     col = irods_getCollection(colpath)
     objmeta=col.metadata.items() #get metadata
@@ -357,8 +357,8 @@ def get_sample(projectid,fileid):
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
-        coll = session.collections.get("/tempZone/home/alice")
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
+        coll = session.collections.get("/irods_1zone/home/alice")
         objects = dict() #make projects dict
         for col in coll.subcollections:
             if (str(col.id) == str(projectid)):
@@ -431,11 +431,11 @@ def upload_project():
                     
 
                     print("Project Unzipped")
-                    irods_createCollection("/tempZone/home/alice/"+req['projectname'],req) #create Project Collection with metadata submitted
+                    irods_createCollection("/irods_1zone/home/alice/"+req['projectname'],req) #create Project Collection with metadata submitted
                     print("Collection Created")
 
                     # create Collection for each sample in metadata
-                    createsample_collections(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/","/tempZone/home/alice/"+req['projectname']+"/") 
+                    createsample_collections(app.config["PROJECT_UPLOADS"]+"/"+req['projectname']+"/","/irods_1zone/home/alice/"+req['projectname']+"/") 
 
                 
 
@@ -458,7 +458,7 @@ def createsample_collections(originpath,collection):
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
         for sample in samples_metadata: 
             col_path=collection+str(samples_metadata[sample]['sample_id'])
 
@@ -492,7 +492,7 @@ def addmetadata_objects(metadata,collection):
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
-    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='irods_1zone') as session:
         for files in files_metadata:
             obj = session.data_objects.get(collection+files) #get file
             for key in files_metadata[files]: #for every attribute in metadata
