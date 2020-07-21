@@ -79,7 +79,7 @@ def irods_search(term):
                     item["DataObjectID"]=result[DataObject.id] #add value to dictionary
                     item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary       
                     results[result[DataObject.id]]=item
-     
+     Query
                          
         queryZone = session.query(Collection, CollectionMeta).filter(Criterion('=', CollectionMeta.name, 'repository')).filter(Criterion('like', CollectionMeta.value, term))
 
@@ -468,7 +468,7 @@ def createsample_collections(originpath,collection):
             if str(samples_metadata[sample]['BAMfilename'])!="NULL":
                 session.data_objects.put(originpath+str(samples_metadata[sample]['BAMfilename']),col_path+"/")
 
-            if str(samples_metadata[sample]['VCFfilename'])!="NULL":
+            if str(samples_metadata[sample]['VCFfilename'])!="NULL"Ver:
                 session.data_objects.put(originpath+str(samples_metadata[sample]['VCFfilename']),col_path+"/")
 
             if str(samples_metadata[sample]['FASTQ_r1filename'])!="NULL":
@@ -488,7 +488,7 @@ def addmetadata_objects(metadata,collection):
     files_metadata = convert_csv(metadata)
     username = "alice"
     passw="alicepass"
-    try:
+    try:Add
         env_file = os.environ['IRODS_ENVIRONMENT_FILE']
     except KeyError:
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
