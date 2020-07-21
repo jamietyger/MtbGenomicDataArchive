@@ -79,7 +79,6 @@ def irods_search(term):
                     item["DataObjectID"]=result[DataObject.id] #add value to dictionary
                     item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary       
                     results[result[DataObject.id]]=item
-     Query
                          
         queryZone = session.query(Collection, CollectionMeta).filter(Criterion('=', CollectionMeta.name, 'repository')).filter(Criterion('like', CollectionMeta.value, term))
 
