@@ -10,43 +10,53 @@
     <table class="table is-hoverable is-fullwidth">
       <thead>
         <tr>
-        <th class="has-text-centered">Sample ID</th> 
-        <th class="has-text-centered">Sample name</th> 
-        <th class="has-text-centered">Sequencing Center</th> 
-        <th class="has-text-centered">Accession Number</th>
-        <th class="has-text-centered">Download</th>
-      </tr>
-    </thead> 
+          <th class="has-text-centered">Sample ID</th> 
+          <th class="has-text-centered">BAMfilename</th> 
+          <th class="has-text-centered">Sequence Submitted</th> 
+          <th class="has-text-centered">Sample Collection Date</th>
+          <th class="has-text-centered">Download</th>
+        </tr>
+      </thead> 
     
     <tfoot>
     </tfoot> 
-    <tbody>
-
-
-        
-            {% for sample in samples.items() %}
-            <tr>
-                <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{projectid}}/{{ sample[0] }}" >{{ sample[0] }}</a></span> </div>
-                </td> 
-                <td class="has-text-centered"> {{ sample[1]["samplename"] }}</td>  
-                <td class="has-text-centered">{{ sample[1]["sequencing_center"] }}</td>
-                <td class="has-text-centered">{{ sample[1]["accession_number"] }}</td>
+    <tbody>    
+      <tr>
+          <td class="has-text-centered">
+              <div class="tag is-light"><a href="/projects/{{projectid}}/{{ projectid }}" >{{ projectid }}</a></span> </div>
+          </td>
+          
+          <td class="has-text-centered has-text-black"> <div>{{ samples["BAMfilename"][0] }}</div></td> 
               
-                <td class="has-text-centered">
-                  <a href= "/download-sample/{{ projectname }}/{{ sample[1]["samplename"] }}" class="button">
-                      <span class="icon is-small">
-                        <i class="fas fa-download"></i>
-                      </span>
-                    </a>
-                  </td>
-                </tr>
-            
-            {% endfor %}
-        
-
-
-
+          <td class="has-text-centered">{{samples["sequence submitted by"][0] }}</td>
+              
+          <td class="has-text-centered">{{ samples['sample collection date'][0] }}</td>
+          
+          <td class="has-text-centered">
+            <a href= "/download-sample/{{ projectname }}/{{ projectname }}" class="button">
+                <span class="icon is-small">
+                  <i class="fas fa-download"></i>
+                </span>
+              </a>
+            </td>
+        </tr>
+        <tr>
+          <td class="has-text-centered">
+            <div class="tag is-light"><a href="/projects/{{projectid}}/{{ projectid }}" >{{ projectid }}</a></span> </div>
+          </td>
+          <td class="has-text-centered has-text-black"> <div>{{ samples["BAMfilename"][1] }}</div></td> 
+              
+          <td class="has-text-centered">{{samples["sequence submitted by"][1] }}</td>
+              
+          <td class="has-text-centered">{{ samples['sample collection date'][1] }}</td>
+          <td class="has-text-centered">
+            <a href= "/download-sample/{{ projectname }}/{{ projectname }}" class="button">
+                <span class="icon is-small">
+                  <i class="fas fa-download"></i>
+                </span>
+              </a>
+            </td>
+        </tr>      
     </tbody>
   </table>
 </div>

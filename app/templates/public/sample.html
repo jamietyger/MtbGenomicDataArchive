@@ -1,7 +1,7 @@
 {% extends "public/templates/public_template.html" %}
 
 {% block title %}{{ samplename }}{% endblock %}
-{% block heading %}{{ samplename }}{% endblock %}
+{% block heading %}{{ files["specimen collector sample ID "][0] }}{% endblock %}
 
 {% block main %}
 <div class="container">
@@ -11,71 +11,343 @@
         <table class="table is-hoverable is-fullwidth">
           <thead>
             <tr>
-
-            {% for key in files %}
-            <th class="has-text-centered">{{key}}</th> 
-            {% endfor %}
-          </tr>
-        </thead> 
+              <th class="has-text-centered">BAM File</th> 
+              <th class="has-text-centered">VCF File</th>
+              <th class="has-text-centered">FastQ-r1</th>
+              <th class="has-text-centered">FastQ-r2</th>   
+            </tr>
+          </thead> 
         
         <tfoot>
         </tfoot> 
         <tbody>
             <tr>
-              {% for key in files %}
                 <td class="has-text-centered">
-                    
-                    <a href= "/download-samplefile/{{ origin }}/{{ files[key] }}" class="button">
+                  <a href= "/download-bamdata/{{ samplename }}" class="button">
                       <span class="icon is-small">
                         <i class="fas fa-download"></i>
                       </span>
                     </a>
+                </td>
 
-                </td> 
-                {% endfor %}
+                <td class="has-text-centered">
+                  <a href= "/download-vcfdata/{{ samplename }}" class="button">
+                      <span class="icon is-small">
+                        <i class="fas fa-download"></i>
+                      </span>
+                    </a>
+                </td>
 
+                <td class="has-text-centered">
+                  <a href= "/download-fastq-r1data/{{ samplename }}" class="button">
+                      <span class="icon is-small">
+                        <i class="fas fa-download"></i>
+                      </span>
+                    </a>
+                </td>
+
+                <td class="has-text-centered">
+                  <a href= "/download-fastq-r2data/{{ samplename }}" class="button">
+                      <span class="icon is-small">
+                        <i class="fas fa-download"></i>
+                      </span>
+                    </a>
+                </td>
             </tr>
-
         </tbody>
       </table>
-    </div>
+    </div>    
+</div>
 
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">specimen collector sample ID</th> 
+          <th class="has-text-centered">sample collected by</th>
+          <th class="has-text-centered">sequence submitted by</th>
+          <th class="has-text-centered">sample collection date</th>   
+        </tr>
+      </thead> 
 
-{% for box in item %}
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["specimen collector sample ID "][0] }}</td>
 
+          <td class="has-text-centered">{{ files["sample collected by"][0] }}</td>
 
-  
-    <div class="box" style="margin-bottom: 2em;">
-          <table class="table is-hoverable is-fullwidth">
-            <thead>
-              <tr>
+          <td class="has-text-centered">{{ files["sequence submitted by"][0] }}</td>
 
-              {% for key in box %}
-              <th class="has-text-centered">{{key}}</th> 
-              {% endfor %}
-            </tr>
-          </thead> 
-          
-          <tfoot>
-          </tfoot> 
-          <tbody>
-              <tr>
-                {% for key in box %}
-                  <td class="has-text-centered">{{ box[key] }}</td> 
-                  {% endfor %}
+          <td class="has-text-centered">{{ files["sample collection date"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-              </tr>
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">geo_loc name (country)</th> 
+          <th class="has-text-centered">geo_loc name (state/province/territory)</th>
+          <th class="has-text-centered">organism</th>
+          <th class="has-text-centered">isolate</th>   
+        </tr>
+      </thead> 
 
-          </tbody>
-        </table>
-      </div>
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["geo_loc name (country)"][0] }}</td>
 
-      {% endfor %}
+          <td class="has-text-centered">{{ files["geo_loc name (state/province/territory)"][0] }}</td>
 
+          <td class="has-text-centered">{{ files["organism"][0] }}</td>
 
+          <td class="has-text-centered">{{ files["isolate"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">host (scientific name)</th> 
+          <th class="has-text-centered">host disease</th>
+          <th class="has-text-centered">purpose of sequencing</th>
+          <th class="has-text-centered">sequencing instrument</th>   
+        </tr>
+      </thead> 
 
-        
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["host (scientific name)"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["host disease"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["purpose of sequencing"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["sequencing instrument"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">consensus sequence software name</th> 
+          <th class="has-text-centered">consensus sequence software version</th>
+          <th class="has-text-centered">study_id</th>
+          <th class="has-text-centered">responsible_person</th>   
+        </tr>
+      </thead> 
+
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["consensus sequence software name"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["consensus sequence software version"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["study_id"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["responsible_person"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">decode</th> 
+          <th class="has-text-centered">culture_request_date</th>
+          <th class="has-text-centered">culture_complete_date</th>
+          <th class="has-text-centered">culture_stored</th>   
+        </tr>
+      </thead> 
+
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["decode"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["culture_request_date"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["culture_complete_date"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["culture_stored"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">dna_extr_sucful</th> 
+          <th class="has-text-centered">dna_storage_loc</th>
+          <th class="has-text-centered">date_dna_sent</th>
+          <th class="has-text-centered">nucleic_acid_concentration</th>   
+        </tr>
+      </thead> 
+
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["dna_extr_sucful"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["dna_storage_loc"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["date_dna_sent"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["nucleic_acid_concentration"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">unit</th> 
+          <th class="has-text-centered">purity_260_280</th>
+          <th class="has-text-centered">ug_sent</th>
+          <th class="has-text-centered">date_wgs_download</th>   
+        </tr>
+      </thead> 
+
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["unit"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["purity_260_280"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["ug_sent"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["date_wgs_download"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">accession_number</th> 
+          <th class="has-text-centered">usap_run</th>
+          <th class="has-text-centered">average_doc</th>
+          <th class="has-text-centered">path_res_dir</th>   
+        </tr>
+      </thead> 
+
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["accession_number"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["usap_run"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["average_doc"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["path_res_dir"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">rflp_family</th> 
+          <th class="has-text-centered">sitvit_family</th>
+          <th class="has-text-centered">age</th>
+          <th class="has-text-centered">sex</th>   
+        </tr>
+      </thead> 
+
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["rflp_family"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["sitvit_family"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["age"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["sex"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">isolate_date</th> 
+          <th class="has-text-centered">sputum_smear</th>
+          <th class="has-text-centered">inh</th>
+          <th class="has-text-centered">rif</th>   
+        </tr>
+      </thead> 
+
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["isolate_date"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["sputum_smear"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["inh"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["rif"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <div class="box" style="margin-bottom: 2em;">
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th class="has-text-centered">ofloxacin</th> 
+          <th class="has-text-centered">etham</th> 
+        </tr>
+      </thead> 
+
+      <tbody>
+        <tr>
+          <td class="has-text-centered">{{ files["ofloxacin"][0] }}</td>
+
+          <td class="has-text-centered">{{ files["etham"][0] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}
 

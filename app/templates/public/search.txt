@@ -27,16 +27,17 @@
             {% for item in results %}
               <tr>
                 <td class="has-text-centered">
-                    <div class="tag is-light has-text-link"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{ results[item]["CollectionOriginID"] }}">{{ results[item]["CollectionOriginID"] }}</a></div>
+                    <div class="tag is-light has-text-black">{{ results[item]["CollectionOriginID"] }}</div>
                 </td> 
                 <td class="has-text-centered"> {{ results[item]["CollectionName"] }}</td> 
+                </td>
                 {% if results[item]["CollectionHost"] == "Human" %}
                   <td class="has-text-centered">
-                      <div class="tag is-warning has-text-black">{{ results[item]["CollectionHost"] }}</div>
+                      <div class="tag is-warning"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{results[item]["CollectionID"]}}" >{{ results[item]["CollectionHost"] }}</a></span> </div>
                   </td>
                 {% else %}
                   <td class="has-text-centered">
-                    <div class="tag is-info has-text-white">{{ results[item]["CollectionHost"] }}</div>
+                    <div class="tag is-info"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{results[item]["CollectionID"]}}" >{{ results[item]["CollectionHost"] }}</a></span> </div>
                   </td>
                 {% endif %} 
                  

@@ -11,7 +11,7 @@
       <form action="/upload-project" method="POST" enctype="multipart/form-data">
 
         
-            <div class="field">
+              <div class="field">
                 <label class="label">Project Name</label>
                 <div class="control">
                     <input type="text" class="input" id="projectname" name="projectname" placeholder="e.g. Tuberculosis">
@@ -20,7 +20,7 @@
             
 
             
-              <div class="field">
+                <div class="field">
                   <div class="control is-expanded">
                       <label class="label">Choose Species</label>
                     <div class="select is-fullwidth">
@@ -30,16 +30,36 @@
                       </select>
                     </div>
                   </div>
-                
                 </div>
 
                 <div class="field">
                   <div class="control is-expanded">
-                      <label class="label">Choose Category</label>
+                      <label class="label">Choose Data Type</label>
+                    <div class="select is-fullwidth">
+                      <select id = "dataType" name="dataType">
+                        <option value="Genome Sequencing">Genome Sequencing</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="control is-expanded">
+                      <label class="label">Choose Scope</label>
+                    <div class="select is-fullwidth">
+                      <select id = "scope" name="scope">
+                        <option value="Monoisolate">Monoisolate</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="control is-expanded">
+                      <label class="label">Choose Organism</label>
                     <div class="select is-fullwidth">
                       <select id = "category" name="category">
                         <option value="M.Tuberculosis">M.Tuberculosis</option>
-                        
                       </select>
                     </div>
                   </div>
@@ -61,6 +81,8 @@
                     </div>
                   
                   </div>
+
+                  <input type="hidden" id="dateAdded" name="dateAdded" value={{ date_time }}>
                 
                 
                   <div class="field">
@@ -81,15 +103,14 @@
                                 </span>
                               </label>
                         </div>
-                    
                     </div>
                   
 
                     <div class="field">
                         <div class="control">
                             <button type="submit" class="button is-link">Upload</button>
-                          </div>
                         </div>
+                    </div>
         </div>
     
         
