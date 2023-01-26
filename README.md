@@ -19,6 +19,8 @@ https://github.com/jamietyger/irods_ansible
 ansible-playbook -i inv site.yml
 ```
 
+You can also follow the [iRODS setup Guide](irods_setup.md)
+
 [Beginner Training with iRODS 4.2](irods_beginner_training_2018.pdf) will get you started on the basics of installing iRODS on your local machine and demonstrates the iRods commands. 
 
 
