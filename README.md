@@ -2,6 +2,8 @@
 
 A Data storage solution to make genomic data and metadata both findable and accessible.
 
+![AGA Screenshots](AGAgif.gif)
+
 
 ### Requirements
 
