@@ -10,43 +10,38 @@
     <table class="table is-hoverable is-fullwidth">
       <thead>
         <tr>
-        <th class="has-text-centered">Sample ID</th> 
-        <th class="has-text-centered">Sample name</th> 
-        <th class="has-text-centered">Sequencing Center</th> 
-        <th class="has-text-centered">Accession Number</th>
-        <th class="has-text-centered">Download</th>
-      </tr>
-    </thead> 
+          <th class="has-text-centered">Sample ID</th>
+          <th class="has-text-centered">Specimen Collecter Sample ID</th>  
+          <th class="has-text-centered">Sequence Submitted</th> 
+          <th class="has-text-centered">Sample Collection Date</th>
+          <th class="has-text-centered">Download</th>
+        </tr>
+      </thead> 
     
     <tfoot>
     </tfoot> 
     <tbody>
-
-
-        
-            {% for sample in samples.items() %}
-            <tr>
-                <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{projectid}}/{{ sample[0] }}" >{{ sample[0] }}</a></span> </div>
-                </td> 
-                <td class="has-text-centered"> {{ sample[1]["samplename"] }}</td>  
-                <td class="has-text-centered">{{ sample[1]["sequencing_center"] }}</td>
-                <td class="has-text-centered">{{ sample[1]["accession_number"] }}</td>
+      {% for i in range(0, rows)%}    
+      <tr>
+          <td class="has-text-centered">
+              <div class="tag is-light"><a href="/projects/{{projectid}}/{{ projectid }}/{{i+1}}" >{{ projectid + "."}}{{i+1}}</a></span> </div>
+          </td>
+          
+          <td class="has-text-centered">{{samples["specimen collector sample ID "][i] }}</td>
               
-                <td class="has-text-centered">
-                  <a href= "/download-sample/{{ projectname }}/{{ sample[1]["samplename"] }}" class="button">
-                      <span class="icon is-small">
-                        <i class="fas fa-download"></i>
-                      </span>
-                    </a>
-                  </td>
-                </tr>
-            
-            {% endfor %}
-        
-
-
-
+          <td class="has-text-centered">{{samples["sequence submitted by"][i] }}</td>
+              
+          <td class="has-text-centered">{{ samples['sample collection date'][i] }}</td>
+          
+          <td class="has-text-centered">
+            <a href= "/download-project/{{ projectname }}" class="button">
+                <span class="icon is-small">
+                  <i class="fas fa-download"></i>
+                </span>
+              </a>
+            </td>
+        </tr>
+        {% endfor %}     
     </tbody>
   </table>
 </div>

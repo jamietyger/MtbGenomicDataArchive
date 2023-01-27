@@ -1,0 +1,71 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Search{% endblock %}
+{% block heading %}Browse Results - {{searchitem}} Repository{% endblock %}
+
+{% block main %}
+<div class="container">
+<div class="box" style="margin-bottom: 2em;">
+
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+        <th class="has-text-centered">Project ID</th> 
+        <th class="has-text-centered">Project Name</th> 
+        <th class="has-text-centered">Species</th> 
+        <th class="has-text-centered">Date Added</th>
+        <th class="has-text-centered">Data</th>
+      </tr>
+    </thead> 
+    
+    <tfoot>
+    </tfoot> 
+    <tbody>
+
+   
+        
+            {% for item in results %}
+              <tr>
+                <td class="has-text-centered">
+                    <div class="tag is-light has-text-black">{{ results[item]["CollectionOriginID"] }}</div>
+                </td> 
+                <td class="has-text-centered"> {{ results[item]["CollectionName"] }}</td> 
+                </td>
+                {% if results[item]["CollectionHost"] == "Human" %}
+                  <td class="has-text-centered">
+                      <div class="tag is-warning"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{results[item]["CollectionID"]}}" >{{ results[item]["CollectionHost"] }}</a></span> </div>
+                  </td>
+                {% else %}
+                  <td class="has-text-centered">
+                    <div class="tag is-info"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{results[item]["CollectionID"]}}" >{{ results[item]["CollectionHost"] }}</a></span> </div>
+                  </td>
+                {% endif %} 
+                 
+                </td> 
+               
+                <td class="has-text-centered">{{ results[item]["CollectionDate"] }}</span></td> 
+                <td class="has-text-centered">
+                  <a href= "/download-project/{{ results[item]["CollectionName"] }}" class="button">
+                      <span class="icon is-small">
+                        <i class="fas fa-download"></i>
+                      </span>
+                    </a>
+                </td>
+             
+            
+              </tr>
+            
+            {% endfor %}
+        
+
+
+
+    </tbody>
+  </table>
+</div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

@@ -12,6 +12,8 @@ import shutil
 from flask import Flask, url_for
 from os.path import basename
 
+import pandas as pd
+
 import os
 import zipfile
 from zipfile import ZipFile
@@ -20,7 +22,7 @@ from irods.session import iRODSSession
 from irods.models import Collection, DataObject, CollectionMeta
 from irods.column import Criterion
 
-
+from datetime import datetime #date time import
 
 
 app.config["PROJECT_UPLOADS"] = "app/static/project/uploads"
@@ -31,6 +33,7 @@ app.config["MAX_PROJECT_FILESIZE"] = 0.5 * 1024 * 1024
 @app.route("/search/<searchitem>")
 def search(searchitem):
     results = irods_search(searchitem)
+    #print(results)
     return render_template("public/search.html", searchitem=searchitem,results=results)
 
 @app.route('/search', methods=['POST'])
@@ -82,19 +85,25 @@ def irods_search(term):
      
                          
         queryZone = session.query(Collection, CollectionMeta).filter(Criterion('=', CollectionMeta.name, 'repository')).filter(Criterion('like', CollectionMeta.value, term))
-
         for result in queryZone:
             if "trash" not in result[Collection.name]:
                 item =dict()
                 item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
                 item["CollectionID"]=irods_getCollection(result[Collection.name]).id
                 item["CollectionPath"]=result[Collection.name]
+                col2 = session.collections.get(result[Collection.name])#use collection name to get collection data
+                colmeta = col2.metadata.items()
+                metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
+                item["CollectionHost"]=metadata["host"]
+                item["CollectionDate"]=metadata["dateAdded"]
                 item["CollectionOriginID"]=irods_getCollection(result[Collection.name]).id      
                 results[result[Collection.name]]=item
     
 
     return results        
 
+'''
+Previous getrepo() function
 
 def getrepo():
     username = "alice"
@@ -118,7 +127,28 @@ def getrepo():
                 item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary  
                 results[result[DataObject.id]]=item
 
-    return results        
+    return results
+'''
+def getrepo():
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        coll = session.collections.get("/tempZone/home/alice") #get all collections 
+         
+        results = dict() #make projects dict
+        for col in coll.subcollections: 
+            col2=session.collections.get(col.path) #get collection
+            #print(col.path)
+            colmeta=col2.metadata.items() #get metadata
+            metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
+            metadata['path']=app.config["PROJECT_UPLOADS"]+"/"+metadata['projectname']
+            results[col.id]=metadata #add to projects dict
+
+    return results       
 
 def irods_getCollection(path):
     username = "alice"  #login creds
@@ -188,16 +218,22 @@ def projects():
                 metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
                 metadata['path']=app.config["PROJECT_UPLOADS"]+"/"+metadata['projectname']
                 projects[col.id]=metadata #add to projects dict
+                #print(metadata)
     return render_template("public/projects.html", projects=projects)
 
 @app.route("/projects/<projectid>")
 def project(projectid):
-    projectname,objects = get_project(projectid)
+    projectname,objects,thePath = get_project(projectid)
+    df = pd.read_excel(app.config["PROJECT_UPLOADS"]+"/"+projectname+"/metadata.xlsx")#using pandas to read xslx from path
+    dict = df.to_dict()#convert excel xlsx to python dictionary
+    wb = xlrd.open_workbook(app.config["PROJECT_UPLOADS"]+"/"+projectname+"/metadata.xlsx")
+    sh = wb.sheet_by_index(0) 
+    rows = sh.nrows - 1
+    
     if objects:
-        return render_template("/public/project.html", projectid=projectid,projectname=projectname,samples=objects)
+        return render_template("/public/project.html", projectid=projectid,projectname=projectname,samples=dict, rows=rows)
     else:
         return redirect("/")
-
 
 def get_project(projectid):
     username = "alice"
@@ -209,20 +245,97 @@ def get_project(projectid):
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         coll = session.collections.get("/tempZone/home/alice")
         objects = dict() #make projects dict
+        #print(coll.subcollections)
 
         for col in coll.subcollections:
-       
+            #print(col.id)
             if (str(col.id) == str(projectid)):
-   
+                #print(col.path)
+                col2=session.collections.get(col.path) #get collection
+                colmeta=col2.metadata.items() #get metadata
+                metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
+                metadata['path']=app.config["PROJECT_UPLOADS"]+"/"+metadata['projectname']
+                objects[col.id]=metadata #add to objects dict
+                return col.name,objects,col.path
+
+@app.route("/projects/<projectid>/<sampleid>/<rowid>")
+def objectfile(projectid,sampleid,rowid):
+    projectname,objects,origin = get_project(projectid)
+    df = pd.read_excel(app.config["PROJECT_UPLOADS"]+"/"+projectname+"/metadata.xlsx")#using pandas to read xslx from path
+    dict = df.to_dict()#convert excel xlsx to python dictionary
+    #print(dict)
+    rowid = int(rowid) - 1
+    #print("row: ", rowid)
+    #print(type(dict["FASTQ_r1filename"][rowid]))
+    if type(dict["BAMfilename"][rowid]) == float:
+        #print("b4 Bamfilename:", dict["BAMfilename"][rowid])
+        dict["BAMfilename"][rowid] = "NULL"
+        #print("Bamfilename:", dict["BAMfilename"][rowid])
+    if type(dict["VCFfilename"][rowid]) == float:
+        #print("b4 VCFfilename:", dict["VCFfilename"][rowid])
+        dict["VCFfilename"][rowid] = "NULL"
+        #print("VCFfilename:", dict["VCFfilename"][rowid])
+    if type(dict["FASTQ_r1filename"][rowid]) == float:
+        #print("b4 FASTQ_r1filename:", dict["FASTQ_r1filename"][rowid])
+        dict["FASTQ_r1filename"][rowid] = "NULL"
+        #print("FASTQ_r1filename:", dict["FASTQ_r1filename"][rowid])
+    if type(dict["FASTQ_r2filename"][rowid]) == float:
+        #print("b4 FASTQ_r2filename:", dict["FASTQ_r2filename"][rowid])
+        dict["FASTQ_r2filename"][rowid] = "NULL"
+        #print("FASTQ_r2filename:", dict["FASTQ_r2filename"][rowid])
+    if objects:
+        return render_template("/public/sample.html",sampleid=sampleid,samplename=projectname,files=dict, row=rowid, origin=origin)
+    else:
+        return redirect("/")
+
+
+'''
+Previous
+
+@app.route("/projects/<projectid>/<sampleid>")
+def objectfile(projectid,sampleid):
+    projectname,objects,origin = get_project(projectid)
+    df = pd.read_excel(app.config["PROJECT_UPLOADS"]+"/"+projectname+"/metadata.xlsx")#using pandas to read xslx from path
+    dict = df.to_dict()#convert excel xlsx to python dictionary
+    #print(dict)
+    
+
+    if objects:
+        return render_template("/public/sample.html",sampleid=sampleid,samplename=projectname,files=dict, origin=origin)
+    else:
+        return redirect("/")
+'''
+
+'''
+Previous get_project(projectid)
+
+def get_project(projectid):
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        coll = session.collections.get("/tempZone/home/alice")
+        objects = dict() #make projects dict
+        #print(coll.subcollections)
+
+        for col in coll.subcollections:
+            print(col.id)
+            if (str(col.id) == str(projectid)):
+                
                 for sample in col.subcollections:
                   
-
+                    print(col)
                     if len(sample.metadata.items())!=0:
                         objmeta=sample.metadata.items() #get metadata
                         metadata= irodsmetaJSON(objmeta) #convert metadata to JSON
                         metadata['samplename']= sample.name
                         objects[sample.id]=metadata #add to projects dict
                 return col.name,objects
+'''
+
 
 @app.route("/download-project/<projectname>")
 def download_project(projectname):
@@ -264,7 +377,17 @@ def download_samplet(projectname,samplename):
         return send_file(dfilepath[len("app/"):]+"/"+samplename+".zip", attachment_filename=samplename+".zip")
     except Exception as e:
 	    return str(e)
+'''
+Previous
+@app.route("/download-samplefile/<projectname>/<samplefilename>")
+def download_samplefile(projectname,samplefilename):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
 
+    try:
+        return send_file(path[len("app/"):]+"/"+samplefilename, attachment_filename=samplefilename)
+    except Exception as e:
+	    return str(e)
+'''
 @app.route("/download-samplefile/<projectname>/<samplefilename>")
 def download_samplefile(projectname,samplefilename):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
@@ -277,15 +400,52 @@ def download_samplefile(projectname,samplefilename):
 @app.route("/download-metadata/<projectname>")
 def download_metadata(projectname):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
-
+    print(path)
     try:
         return send_file(path[len("app/"):]+"/metadata.xlsx", attachment_filename=projectname+".xlsx")
+    except Exception as e:
+	    return str(e)
+
+@app.route("/download-bamdata/<projectname>")
+def download_bamdata(projectname):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
+    print(path)
+    try:
+        return send_file(path[len("app/"):]+"/SAWC123.bam", attachment_filename="SAWC123.bam")
+    except Exception as e:
+	    return str(e)
+
+@app.route("/download-vcfdata/<projectname>")
+def download_vcfdata(projectname):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
+    print(path)
+    try:
+        return send_file(path[len("app/"):]+"/SAWC123.vcf", attachment_filename="SAWC123.vcf")
+    except Exception as e:
+	    return str(e)
+
+@app.route("/download-fastq-r1data/<projectname>")
+def download_fastq_r1data(projectname):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
+    print(path)
+    try:
+        return send_file(path[len("app/"):]+"/SAWC123_r1.fastq", attachment_filename="SAWC123_r1.fastq")
+    except Exception as e:
+	    return str(e)
+
+@app.route("/download-fastq-r2data/<projectname>")
+def download_fastq_r2data(projectname):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
+    print(path)
+    try:
+        return send_file(path[len("app/"):]+"/SAWC123_r2.fastq", attachment_filename="SAWC123_r2.fastq")
     except Exception as e:
 	    return str(e)
 
 @app.route("/repository")
 def repository():
     results = getrepo()
+    #print(results)
     return render_template("public/repository.html",results=results)
 
 
@@ -324,6 +484,8 @@ def chunk_dict(d, chunk_size):
     if r:
         yield r
 
+'''
+Previous
 
 @app.route("/projects/<projectid>/<sampleid>")
 def objectfile(projectid,sampleid):
@@ -348,6 +510,8 @@ def objectfile(projectid,sampleid):
         return render_template("/public/sample.html",sampleid=sampleid,samplename=samplename,item=samplemetadata,files=files,origin=origin)
     else:
         return redirect("/")
+'''
+
 
 
 def get_sample(projectid,fileid):
@@ -402,7 +566,8 @@ def allowed_project_filesize(filesize):
 
 @app.route("/upload-project", methods=["GET", "POST"])
 def upload_project():
-  
+
+    date = datetime.now() #date object for date added    
     if request.method == "POST": #If project being uploaded
 
         if request.files:
@@ -422,7 +587,6 @@ def upload_project():
                     print(app.config["PROJECT_UPLOADS"]+"/"+filename)
 
                     req = request.form #project metadata
-                    
                     
 
                     with zipfile.ZipFile(app.config["PROJECT_UPLOADS"]+"/"+filename,"r") as zip_ref: #unzip file
@@ -447,7 +611,7 @@ def upload_project():
 
         
     
-    return render_template("public/upload_project.html", hide_button=False)
+    return render_template("public/upload_project.html", hide_button=False, date_time=str(date))
 
 def createsample_collections(originpath,collection):
     samples_metadata = convert_csv(originpath+"metadata.xlsx")
@@ -460,7 +624,7 @@ def createsample_collections(originpath,collection):
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         for sample in samples_metadata: 
-            col_path=collection+str(samples_metadata[sample]['sample_id'])
+            col_path=collection+str(samples_metadata[sample]['specimen collector sample ID '])
 
             samples_metadata[sample]['origin']=collection
             irods_createCollection(col_path,samples_metadata[sample])

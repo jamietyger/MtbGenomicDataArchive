@@ -1,7 +1,7 @@
 {% extends "public/templates/public_template.html" %}
 
 {% block title %}Search{% endblock %}
-{% block heading %}Browse Results - {{searchitem}}{% endblock %}
+{% block heading %}Browse Results - {{searchitem}} Repository{% endblock %}
 
 {% block main %}
 <div class="container">
@@ -12,9 +12,9 @@
         <tr>
         <th class="has-text-centered">Project ID</th> 
         <th class="has-text-centered">Project Name</th> 
-        <th class="has-text-centered">File ID</th> 
-        <th class="has-text-centered">File Name</th>
-        <th class="has-text-centered">File Size</th>
+        <th class="has-text-centered">Species</th> 
+        <th class="has-text-centered">Date Added</th>
+        <th class="has-text-centered">Data</th>
       </tr>
     </thead> 
     
@@ -25,22 +25,34 @@
    
         
             {% for item in results %}
-            <tr>
+              <tr>
                 <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{ results[item]["CollectionOriginID"] }}" >{{ results[item]["CollectionOriginID"] }}</a></span> </div>
+                    <div class="tag is-light has-text-link"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{ results[item]["CollectionOriginID"] }}">{{ results[item]["CollectionOriginID"] }}</a></div>
                 </td> 
                 <td class="has-text-centered"> {{ results[item]["CollectionName"] }}</td> 
-                </td> 
-                <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{results[item]["CollectionID"]}}" >{{ results[item]["DataObjectID"] }}</a></span> </div>
-                </td> 
+                {% if results[item]["CollectionHost"] == "Human" %}
+                  <td class="has-text-centered">
+                      <div class="tag is-warning has-text-black">{{ results[item]["CollectionHost"] }}</div>
+                  </td>
+                {% else %}
+                  <td class="has-text-centered">
+                    <div class="tag is-info has-text-white">{{ results[item]["CollectionHost"] }}</div>
+                  </td>
+                {% endif %} 
+                 
                 </td> 
                
-                <td class="has-text-centered">{{ results[item]["DataObjectName"] }}</span></td> 
-                <td class="has-text-centered">{{ results[item]["DataObjectSize"] }}</td> 
+                <td class="has-text-centered">{{ results[item]["CollectionDate"] }}</span></td> 
+                <td class="has-text-centered">
+                  <a href= "/download-project/{{ results[item]["CollectionName"] }}" class="button">
+                      <span class="icon is-small">
+                        <i class="fas fa-download"></i>
+                      </span>
+                    </a>
+                </td>
              
             
-                </tr>
+              </tr>
             
             {% endfor %}
         

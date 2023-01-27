@@ -13,8 +13,11 @@
         <th class="has-text-centered">Project ID</th> 
         <th class="has-text-centered">Project Name</th> 
         <th class="has-text-centered">Species</th>
+        <th class="has-text-centered">Data Type</th>
+        <th class="has-text-centered">Scope</th>
         <th class="has-text-centered">Category</th>
         <th class="has-text-centered">Repository</th>
+        <th class="has-text-centered">Date Added</th>
         <th class="has-text-centered">Project</th>
         <th class="has-text-centered">Metadata</th>  
       </tr>
@@ -29,12 +32,31 @@
             {% for project in projects %}
             <tr>
                 <td class="has-text-centered">
-                    <div class="tag is-light"><a href="/projects/{{ project }}" >{{ project }}</a></span> </div>
+                    <div class="tag is-light has-text-link"><a href="/projects/{{ project }}">{{ project }}</a></div>
                 </td> 
                 <td class="has-text-centered"> {{ projects[project]["projectname"] }}</td> 
-                <td class="has-text-centered">{{ projects[project]["host"] }}</span></td> 
-                <td class="has-text-centered">{{ projects[project]["category"] }}</span></td> 
-                <td class="has-text-centered">{{ projects[project]["repository"] }}</td> 
+                <td class="has-text-centered">
+                  {% if projects[project]["host"] == "Human" %}
+                    <div class="tag is-warning has-text-black">{{ projects[project]["host"] }}</div>
+                  {% else %}
+                    <div class="tag is-info has-text-white">{{ projects[project]["host"] }}</div>
+                  {% endif %}
+                </td>
+                <td class="has-text-centered">{{ projects[project]["dataType"] }}</td>  
+                <td class="has-text-centered">{{ projects[project]["scope"] }}</td> 
+                <td class="has-text-centered">{{ projects[project]["category"] }}</td>
+                <td class="has-text-centered">
+                  {% if projects[project]["repository"] == "SANBI" %}
+                    <div class="tag is-black has-text-warning">{{ projects[project]["repository"] }}</div>
+                  {% elif projects[project]["repository"] == "Kenya" %}
+                    <div class="tag is-danger has-text-white">{{ projects[project]["repository"] }}</div>
+                  {% elif projects[project]["repository"] == "Uganda" %}
+                    <div class="tag is-primary has-text-black">{{ projects[project]["repository"] }}</div>
+                  {% endif %}
+                </td> 
+                
+                
+                <td class="has-text-centered">{{ projects[project]["dateAdded"] }}</td> 
                 <td class="has-text-centered">
                   <a href= "/download-project/{{ projects[project]["projectname"] }}" class="button">
                       <span class="icon is-small">
@@ -48,7 +70,7 @@
                           <i class="fas fa-download"></i>
                         </span>
                       </a>
-                    </td>
+                  </td>
                 </tr>
             
             {% endfor %}

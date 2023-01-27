@@ -1,0 +1,57 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Repository{% endblock %}
+{% block heading %}Browse Repository{% endblock %}
+
+{% block main %}
+<div class="container">
+<div class="box" style="margin-bottom: 2em;">
+
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+        <th class="has-text-centered">Project ID</th> 
+        <th class="has-text-centered">Project Name</th> 
+        <th class="has-text-centered">File ID</th> 
+        <th class="has-text-centered">File Name</th>
+        <th class="has-text-centered">File Size</th>
+      </tr>
+    </thead> 
+    
+    <tfoot>
+    </tfoot> 
+    <tbody>
+
+   
+                  
+            {% for item in results %}
+            <tr>
+                <td class="has-text-centered">
+                  <div class="tag is-light"><a href="/projects/{{ results[item]["CollectionOriginID"] }}" >{{ results[item]["CollectionOriginID"] }}</a></span> </div>
+                </td> 
+                <td class="has-text-centered"> {{ results[item]["CollectionName"] }}</td> 
+                </td> 
+                <td class="has-text-centered">
+                  <div class="tag is-light"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{results[item]["CollectionID"]}}" >{{ results[item]["DataObjectID"] }}</a></span> </div>
+                </td> 
+                </td> 
+               
+                <td class="has-text-centered">{{ results[item]["DataObjectName"] }}</span></td> 
+                <td class="has-text-centered">{{ results[item]["DataObjectSize"] }}</td> 
+             
+            
+            </tr>
+            {% endfor %}
+        
+            
+
+
+    </tbody>
+  </table>
+</div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

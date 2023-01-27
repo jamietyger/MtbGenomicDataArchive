@@ -11,40 +11,41 @@
       <thead>
         <tr>
         <th class="has-text-centered">Project ID</th> 
+        <th class="has-text-centered">Repository</th> 
         <th class="has-text-centered">Project Name</th> 
-        <th class="has-text-centered">File ID</th> 
-        <th class="has-text-centered">File Name</th>
-        <th class="has-text-centered">File Size</th>
+        <th class="has-text-centered">Project</th>
+        <!--th class="has-text-centered">File Size</th-->
       </tr>
     </thead> 
     
     <tfoot>
     </tfoot> 
     <tbody>
-
-   
-        
+    
             {% for item in results %}
             <tr>
-                <td class="has-text-centered">
-                  <div class="tag is-light"><a href="/projects/{{ results[item]["CollectionOriginID"] }}" >{{ results[item]["CollectionOriginID"] }}</a></span> </div>
-                </td> 
-                <td class="has-text-centered"> {{ results[item]["CollectionName"] }}</td> 
-                </td> 
-                <td class="has-text-centered">
-                  <div class="tag is-light"><a href="/projects/{{results[item]["CollectionOriginID"]}}/{{results[item]["CollectionID"]}}" >{{ results[item]["DataObjectID"] }}</a></span> </div>
-                </td> 
-                </td> 
-               
-                <td class="has-text-centered">{{ results[item]["DataObjectName"] }}</span></td> 
-                <td class="has-text-centered">{{ results[item]["DataObjectSize"] }}</td> 
-             
-            
-                </tr>
-            
+              <td class="has-text-centered">
+                <div class="tag is-light has-text-link"><a href="/projects/{{ item }}">{{ item }}</a></div>
+              </td>
+              <td class="has-text-centered">
+                {% if results[item]["repository"] == "SANBI" %}
+                <div class="tag is-black has-text-warning">{{ results[item]["repository"] }}</div>
+                {% elif results[item]["repository"] == "Kenya" %}
+                <div class="tag is-danger has-text-white">{{ results[item]["repository"] }}</div>
+                {% elif results[item]["repository"] == "Uganda" %}
+                <div class="tag is-primary has-text-black">{{ results[item]["repository"] }}</div>
+                {% endif %}
+              </td> 
+              <td class="has-text-centered"> {{ results[item]["projectname"] }}</td>
+              <td class="has-text-centered">
+                <a href= "/download-project/{{ results[item]["projectname"] }}" class="button">
+                    <span class="icon is-small">
+                      <i class="fas fa-download"></i>
+                    </span>
+                  </a>
+              </td>  
+            </tr>
             {% endfor %}
-        
-
 
 
     </tbody>
