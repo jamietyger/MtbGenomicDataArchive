@@ -226,9 +226,12 @@ def project(projectid):
     projectname,objects,thePath = get_project(projectid)
     df = pd.read_excel(app.config["PROJECT_UPLOADS"]+"/"+projectname+"/metadata.xlsx")#using pandas to read xslx from path
     dict = df.to_dict()#convert excel xlsx to python dictionary
-    #print(dict)
+    wb = xlrd.open_workbook(app.config["PROJECT_UPLOADS"]+"/"+projectname+"/metadata.xlsx")
+    sh = wb.sheet_by_index(0) 
+    rows = sh.nrows - 1
+    
     if objects:
-        return render_template("/public/project.html", projectid=projectid,projectname=projectname,samples=dict)
+        return render_template("/public/project.html", projectid=projectid,projectname=projectname,samples=dict, rows=rows)
     else:
         return redirect("/")
 
@@ -255,18 +258,53 @@ def get_project(projectid):
                 objects[col.id]=metadata #add to objects dict
                 return col.name,objects,col.path
 
+@app.route("/projects/<projectid>/<sampleid>/<rowid>")
+def objectfile(projectid,sampleid,rowid):
+    projectname,objects,origin = get_project(projectid)
+    df = pd.read_excel(app.config["PROJECT_UPLOADS"]+"/"+projectname+"/metadata.xlsx")#using pandas to read xslx from path
+    dict = df.to_dict()#convert excel xlsx to python dictionary
+    #print(dict)
+    rowid = int(rowid) - 1
+    #print("row: ", rowid)
+    #print(type(dict["FASTQ_r1filename"][rowid]))
+    if type(dict["BAMfilename"][rowid]) == float:
+        #print("b4 Bamfilename:", dict["BAMfilename"][rowid])
+        dict["BAMfilename"][rowid] = "NULL"
+        #print("Bamfilename:", dict["BAMfilename"][rowid])
+    if type(dict["VCFfilename"][rowid]) == float:
+        #print("b4 VCFfilename:", dict["VCFfilename"][rowid])
+        dict["VCFfilename"][rowid] = "NULL"
+        #print("VCFfilename:", dict["VCFfilename"][rowid])
+    if type(dict["FASTQ_r1filename"][rowid]) == float:
+        #print("b4 FASTQ_r1filename:", dict["FASTQ_r1filename"][rowid])
+        dict["FASTQ_r1filename"][rowid] = "NULL"
+        #print("FASTQ_r1filename:", dict["FASTQ_r1filename"][rowid])
+    if type(dict["FASTQ_r2filename"][rowid]) == float:
+        #print("b4 FASTQ_r2filename:", dict["FASTQ_r2filename"][rowid])
+        dict["FASTQ_r2filename"][rowid] = "NULL"
+        #print("FASTQ_r2filename:", dict["FASTQ_r2filename"][rowid])
+    if objects:
+        return render_template("/public/sample.html",sampleid=sampleid,samplename=projectname,files=dict, row=rowid, origin=origin)
+    else:
+        return redirect("/")
+
+
+'''
+Previous
+
 @app.route("/projects/<projectid>/<sampleid>")
 def objectfile(projectid,sampleid):
     projectname,objects,origin = get_project(projectid)
     df = pd.read_excel(app.config["PROJECT_UPLOADS"]+"/"+projectname+"/metadata.xlsx")#using pandas to read xslx from path
     dict = df.to_dict()#convert excel xlsx to python dictionary
-    print(dict)
+    #print(dict)
     
 
     if objects:
         return render_template("/public/sample.html",sampleid=sampleid,samplename=projectname,files=dict, origin=origin)
     else:
         return redirect("/")
+'''
 
 '''
 Previous get_project(projectid)
@@ -339,7 +377,17 @@ def download_samplet(projectname,samplename):
         return send_file(dfilepath[len("app/"):]+"/"+samplename+".zip", attachment_filename=samplename+".zip")
     except Exception as e:
 	    return str(e)
+'''
+Previous
+@app.route("/download-samplefile/<projectname>/<samplefilename>")
+def download_samplefile(projectname,samplefilename):
+    path=app.config["PROJECT_UPLOADS"]+"/"+projectname
 
+    try:
+        return send_file(path[len("app/"):]+"/"+samplefilename, attachment_filename=samplefilename)
+    except Exception as e:
+	    return str(e)
+'''
 @app.route("/download-samplefile/<projectname>/<samplefilename>")
 def download_samplefile(projectname,samplefilename):
     path=app.config["PROJECT_UPLOADS"]+"/"+projectname
@@ -576,7 +624,7 @@ def createsample_collections(originpath,collection):
             env_file = os.path.expanduser('~/.irods/irods_environment.json')
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         for sample in samples_metadata: 
-            col_path=collection+str(samples_metadata[sample]['sample_id'])
+            col_path=collection+str(samples_metadata[sample]['specimen collector sample ID '])
 
             samples_metadata[sample]['origin']=collection
             irods_createCollection(col_path,samples_metadata[sample])
