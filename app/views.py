@@ -70,18 +70,51 @@ def irods_search(term):
     with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
         query = session.query(Collection.name,DataObject)
         results = {}
-        for result in query:
+   
+                         
+        queryZone = session.query(Collection, CollectionMeta).filter(Criterion('=', CollectionMeta.name, 'repository')).filter(Criterion('like', CollectionMeta.value, term))
+        for result in queryZone:
             if "trash" not in result[Collection.name]:
-                if term in result[Collection.name]: #or term in result[CollectionMeta.value]:
-                    item =dict()
-                    item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
-                    item["CollectionPath"]=result[Collection.name]
-                    item["CollectionID"]=irods_getCollection(result[Collection.name]).id
-                    item["CollectionOriginID"]=irods_getCollection(item["CollectionPath"].rsplit('/', 1)[0]).id
-                    item["DataObjectName"]=result[DataObject.name] #add value to dictionary
-                    item["DataObjectID"]=result[DataObject.id] #add value to dictionary
-                    item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary       
-                    results[result[DataObject.id]]=item
+                item =dict()
+                item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
+                item["CollectionID"]=irods_getCollection(result[Collection.name]).id
+                item["CollectionPath"]=result[Collection.name]
+                col2 = session.collections.get(result[Collection.name])#use collection name to get collection data
+                colmeta = col2.metadata.items()
+                metadata= irodsmetaJSON(colmeta) #convert metadata to JSON
+                item["CollectionHost"]=metadata["host"]
+                item["CollectionDate"]=metadata["dateAdded"]
+                item["CollectionOriginID"]=irods_getCollection(result[Collection.name]).id      
+                results[result[Collection.name]]=item
+    
+
+    return results
+
+'''
+Previous
+def irods_search(term):
+    username = "alice"
+    passw="alicepass"
+    try:
+        env_file = os.environ['IRODS_ENVIRONMENT_FILE']
+    except KeyError:
+            env_file = os.path.expanduser('~/.irods/irods_environment.json')
+    with iRODSSession(irods_env_file=env_file ,host='localhost', port=1247, user=username, password=passw, zone='tempZone') as session:
+        query = session.query(Collection.name,DataObject)
+        results = {}
+
+    for result in query:
+        if "trash" not in result[Collection.name]:
+            if term in result[Collection.name]: #or term in result[CollectionMeta.value]:
+                item =dict()
+                item["CollectionName"]=result[Collection.name].split('/')[-1] #add value to dictionary
+                item["CollectionPath"]=result[Collection.name]
+                item["CollectionID"]=irods_getCollection(result[Collection.name]).id
+                item["CollectionOriginID"]=irods_getCollection(item["CollectionPath"].rsplit('/', 1)[0]).id
+                item["DataObjectName"]=result[DataObject.name] #add value to dictionary
+                item["DataObjectID"]=result[DataObject.id] #add value to dictionary
+                item["DataObjectSize"]=humanbytes(result[DataObject.size]) #add value to dictionary       
+                results[result[DataObject.id]]=item
      
                          
         queryZone = session.query(Collection, CollectionMeta).filter(Criterion('=', CollectionMeta.name, 'repository')).filter(Criterion('like', CollectionMeta.value, term))
@@ -100,7 +133,9 @@ def irods_search(term):
                 results[result[Collection.name]]=item
     
 
-    return results        
+    return results    
+'''
+    
 
 '''
 Previous getrepo() function
