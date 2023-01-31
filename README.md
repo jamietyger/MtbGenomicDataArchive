@@ -1,8 +1,8 @@
-# African Genome Archive
+# M.tuberculosis Genomic Data Archive
 
 A Data storage solution to make genomic data and metadata both findable and accessible.
 
-![AGA Screenshots](AGAgif.gif)
+![MtbGDA Screenshots](AGAgif.gif)
 
 
 ### Requirements
